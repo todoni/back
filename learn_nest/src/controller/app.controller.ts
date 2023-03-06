@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query, Post, Body } from '@nestjs/common';
 import { AppService } from '../service/app.service';
 import { Res, HttpCode, Redirect } from '@nestjs/common';
 
-import { Dto } from '../dto/create-cat.dto';
+import { CreateCatDto } from '../dto/create-cat.dto';
 
 @Controller()
 export class AppController {
@@ -46,9 +46,9 @@ export class AppController {
   }
 
   @Post()
-  post(@Body() dto : Dto, @Res() res): string {
-    if (dto.id === dto.password){
-      let response = `id : ${dto.id}, pw: ${dto.password}`;
+  post(@Body() dto : CreateCatDto, @Res() res): string {
+    if (dto.name === dto.breed){
+      let response = `name : ${dto.name}, breed: ${dto.breed}`;
       return res.status(200).send({response});
     }
     let response = `not same`;
