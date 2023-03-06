@@ -1,8 +1,8 @@
 import { Controller, Get, Param, Query, Post, Body } from '@nestjs/common';
-import { AppService } from './app.service';
+import { AppService } from '../service/app.service';
 import { Res, HttpCode, Redirect } from '@nestjs/common';
 
-import { Dto } from './dto';
+import { Dto } from '../dto/create-cat.dto';
 
 @Controller()
 export class AppController {
