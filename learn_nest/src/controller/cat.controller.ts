@@ -1,5 +1,5 @@
 
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { CreateCatDto } from 'src/dto/create-cat.dto';
 
 
@@ -23,5 +23,11 @@ export class CatsController {
   @Get("/test")
   test(): string {
     return "test";
+  }
+
+  @Get("/test/error")
+  throwError(): string {
+    // throw new HttpException("custom message", HttpStatus.EXPECTATION_FAILED);
+    throw new NotFoundException();
   }
 }
