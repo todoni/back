@@ -12,7 +12,8 @@ import { HttpExceptionFilter } from './filter/http-exception.filter';
 @Module({
   imports: [CatsModule],
   controllers: [AppController],
-  providers: [AppService, {provide: APP_FILTER , useClass: HttpExceptionFilter}],
+  providers: [AppService],
+  // providers: [AppService, {provide: APP_FILTER , useClass: HttpExceptionFilter}],
 })
 export class AppModule implements NestModule{
   configure(consumer: MiddlewareConsumer) {
