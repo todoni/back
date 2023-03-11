@@ -13,45 +13,49 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get("/echo/:str")
-  echoParam(@Param('str') id: string,  @Res() res): string {
-    let response = id + "  test";
-    return res.status(200).send({response});
+  @Get('/echo/:str')
+  echoParam(@Param('str') id: string, @Res() res): string {
+    let response = id + '  test';
+    return res.status(200).send({ response });
   }
 
-  @Get("/query/")
-  echoQuery(@Query('id') id: string, @Query('pw') pw: string, @Res() res): string {
-    if (id == null || pw == null){
-      let response = "failed";
-      return res.status(200).send({response});
+  @Get('/query/')
+  echoQuery(
+    @Query('id') id: string,
+    @Query('pw') pw: string,
+    @Res() res,
+  ): string {
+    if (id == null || pw == null) {
+      let response = 'failed';
+      return res.status(200).send({ response });
     }
-    if (id == pw){
+    if (id == pw) {
       let response = `id : ${id}, pw: ${pw}`;
-      return res.status(200).send({response});
+      return res.status(200).send({ response });
     }
-    let response = "failed";
-    return res.status(200).send({response});
+    let response = 'failed';
+    return res.status(200).send({ response });
   }
 
-  @Get("/status")
+  @Get('/status')
   @HttpCode(201)
-  status( @Res() res): string {
-    return res.status(201).send("123");
+  status(@Res() res): string {
+    return res.status(201).send('123');
   }
 
-  @Get("/redirection")
+  @Get('/redirection')
   @Redirect('https://naver.com', 301)
   redirection(): string {
-    return "check code";
+    return 'check code';
   }
 
   @Post()
-  post(@Body() dto : CreateCatDto, @Res() res): string {
-    if (dto.name === dto.breed){
+  post(@Body() dto: CreateCatDto, @Res() res): string {
+    if (dto.name === dto.breed) {
       let response = `name : ${dto.name}, breed: ${dto.breed}`;
-      return res.status(200).send({response});
+      return res.status(200).send({ response });
     }
     let response = `not same`;
-    return res.status(200).send({response});
+    return res.status(200).send({ response });
   }
 }
