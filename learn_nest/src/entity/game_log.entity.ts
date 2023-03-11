@@ -10,7 +10,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
-import { UserAchievement } from './user_achievement';
 
 @Entity('game_logs')
 export class GameLog {
@@ -25,6 +24,9 @@ export class GameLog {
 
   @Column('varchar', { length: 20 })
   title: string;
+
+  @Column('smallint')
+  score: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
