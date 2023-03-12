@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Achievement } from './achievement.entity';
 import { Block } from './block.entity';
-import { Friend } from './fiend.entity';
+import { Friend } from './friend.entity';
 import { GameLog } from './game_log.entity';
 import { UserAchievement } from './user_achievement';
 

@@ -1,7 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Achievement } from 'src/entity/achievement.entity';
 import { Block } from 'src/entity/block.entity';
-import { Friend } from 'src/entity/fiend.entity';
+import { Friend } from 'src/entity/friend.entity';
 import { GameLog } from 'src/entity/game_log.entity';
 import { User } from 'src/entity/user.entity';
 import { UserAchievement } from 'src/entity/user_achievement';
