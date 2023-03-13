@@ -9,10 +9,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Common } from './common/common.entity';
 import { User } from './user.entity';
 
 @Entity('game_logs')
-export class GameLog {
+export class GameLog extends Common {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
@@ -27,12 +28,6 @@ export class GameLog {
 
   @Column('smallint')
   score: number;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  uodatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'winner_id', referencedColumnName: 'id' })

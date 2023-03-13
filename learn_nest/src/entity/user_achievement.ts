@@ -9,21 +9,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Achievement } from './achievement.entity';
+import { Common } from './common/common.entity';
 import { User } from './user.entity';
 
 @Entity('user_achievements')
-export class UserAchievement {
+export class UserAchievement extends Common {
   @PrimaryColumn('bigint', { name: 'user_id' })
   userId: number;
 
   @PrimaryColumn('bigint', { name: 'achievement_id' })
   achievementId: number;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  uodatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })

@@ -10,10 +10,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Common } from './common/common.entity';
 import { User } from './user.entity';
 
 @Entity('friends')
-export class Friend {
+export class Friend extends Common {
   @PrimaryColumn('bigint', { name: 'source_id' })
   // @Column('bigint', { name: 'source_id' })
   sourceId: number;
@@ -21,12 +22,6 @@ export class Friend {
   @PrimaryColumn('bigint', { name: 'target_id' })
   // @Column('bigint', { name: 'target_id' })
   targetId: number;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  uodatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'source_id', referencedColumnName: 'id' })

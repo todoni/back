@@ -9,12 +9,13 @@ import {
 } from 'typeorm';
 import { Achievement } from './achievement.entity';
 import { Block } from './block.entity';
+import { Common } from './common/common.entity';
 import { Friend } from './friend.entity';
 import { GameLog } from './game_log.entity';
 import { UserAchievement } from './user_achievement';
 
 @Entity('users')
-export class User {
+export class User extends Common {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
@@ -29,12 +30,6 @@ export class User {
 
   @Column('varchar', { length: 255 })
   profile: string;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  uodatedAt: Date;
 
   //////////////////////////////////////////////
 

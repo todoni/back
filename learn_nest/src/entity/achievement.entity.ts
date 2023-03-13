@@ -6,19 +6,14 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Common } from './common/common.entity';
 import { UserAchievement } from './user_achievement';
 
 @Entity('achievements')
-export class Achievement {
+export class Achievement extends Common {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
   @Column('varchar', { length: 20 })
   title: string;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  uodatedAt: Date;
 }
