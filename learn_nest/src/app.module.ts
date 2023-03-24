@@ -10,9 +10,10 @@ import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './filter/http-exception.filter';
 import { typeOrmConfig } from './config/typeorm.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './module/auth.module';
 
 @Module({
-  imports: [CatsModule, TypeOrmModule.forRoot(typeOrmConfig)],
+  imports: [AuthModule, CatsModule, TypeOrmModule.forRoot(typeOrmConfig)],
   controllers: [AppController],
   providers: [AppService],
   // providers: [AppService, {provide: APP_FILTER , useClass: HttpExceptionFilter}],
