@@ -7,6 +7,7 @@ export class FtAuthGuard extends AuthGuard('ft') {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
+    console.log('Enter AuthGuard!');
     const request = context.switchToHttp().getRequest();
     super.logIn(request).catch(() => true);
     return super.canActivate(context);

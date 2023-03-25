@@ -5,3 +5,10 @@ export interface AuthResponseDto {
   firstAccess?: boolean;
   token?: boolean;
 }
+
+export interface TokenDto {
+  accessToken?: string;
+  refreshToken?: string;
+  sign?: string;
+  code?: string;
+}
