@@ -22,6 +22,9 @@ export class User extends Common {
   @Column('varchar', { length: 20 })
   name: string;
 
+  @Column('varchar', { length: 20 })
+  nickname: string;
+
   @Column({ name: 'tw_factor', default: false })
   twoFactor: boolean;
 
