@@ -32,10 +32,4 @@ export class AuthController {
     console.log('Enter callback controller!');
     return { status: 200, message: 'OK' };
   }
-
-  @Get('test')
-  @UseGuards(FtAuthGuard)
-  async test(@Req() req): Promise<any> {
-    return req;
-  }
 }
