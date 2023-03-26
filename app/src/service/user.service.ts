@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Achievement } from 'src/entity/achievement.entity';
 import { User } from 'src/entity/user.entity';
-import FriendRepository from 'src/repository/friend.repository';
 import UserRepository from 'src/repository/user.repository';
 
 @Injectable()
@@ -17,8 +17,21 @@ export class UserService {
     });
   }
 
-  async testGetUser(id: number): Promise<User | null> {
-    const result = await this.userRepository.findOne({ where: { id: id } });
+  async testGetUser(user_id: number): Promise<User | null> {
+    console.log(`user_id1 = ${user_id}`);
+    const result = await this.userRepository.findOne({
+      where: { id: user_id },
+      relations: [
+        'sourceFriends',
+        'targetFriends',
+        'sourceBlocks',
+        'targetBlocks',
+        'achievements',
+        'winLogs',
+        'loseLogs',
+      ],
+    });
+    // const result = await this.userRepository.findUser('id', id);
     return result;
   }
 }

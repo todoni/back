@@ -6,19 +6,20 @@ import { UserService } from 'src/service/user.service';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @Get('test/add-new')
+  @Get('add-new')
   test(): string {
     this.userService.testAddUser();
     return 'test';
   }
 
-  @Get('test/get/:id')
-  async getFirstUser(@Param(':id') id: number): Promise<string> {
+  @Get('get/:id')
+  async getFirstUser(@Param('id') id: number): Promise<object> {
     const user: User = await this.userService.testGetUser(id);
     if (user == null) {
-      return 'shit';
+      return { status: 400, message: 'shit' };
     }
     console.log(user);
-    return `id : ${user.id}, name: ${user.name}`;
+    // return `id : ${user.id}, name: ${user.name}`;
+    return user;
   }
 }
