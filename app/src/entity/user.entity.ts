@@ -48,11 +48,9 @@ export class User extends Common {
   @OneToMany(() => Block, (block) => block.targetUser, { cascade: true })
   targetBlocks: Block[];
 
-  @OneToMany(
-    () => UserAchievement,
-    (UserAchievement) => UserAchievement.achievement,
-    { cascade: true },
-  )
+  @OneToMany(() => UserAchievement, (UserAchievement) => UserAchievement.user, {
+    cascade: true,
+  })
   achievements: UserAchievement[];
 
   @OneToMany(() => GameLog, (log) => log.winner, { cascade: true })
