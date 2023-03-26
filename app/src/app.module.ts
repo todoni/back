@@ -11,11 +11,19 @@ import { AuthModule } from './module/auth.module';
 import { AuthController } from './controller/auth.controller';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './module/user.module';
+import UserRepository from './repository/user.repository';
+import FriendRepository from './repository/friend.repository';
+import BlockRepository from './repository/block.repository';
+import GameLogRepository from './repository/game_log.repository';
+import AchievementRepository from './repository/achievement.repository';
+import UserAchievementRepository from './repository/user_achievement.repository';
+import { TestModule } from './module/test.moule';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    TestModule,
     TypeOrmModule.forRoot(typeOrmConfig),
     ConfigModule.forRoot({
       isGlobal: true,

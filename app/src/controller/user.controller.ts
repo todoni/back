@@ -1,20 +1,24 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { UserDetailDto } from 'src/dto/user.dto';
+import { User } from 'src/entity/user.entity';
+import { UserService } from 'src/service/user.service';
 
 @Controller('user')
 export class UserController {
-  @Get('detail')
-  userDetail(): UserDetailDto {
-    return {
-      name: 'name',
-      nickname: 'nick',
-      twFactor: true,
-      twFactorUid: '',
-      profile: '',
-      level: 0,
-      winPercent: 2,
-      userLogs: [],
-      achivements: [],
-    };
+  constructor(private readonly userService: UserService) {}
+  @Get('test/add-new')
+  test(): string {
+    this.userService.testAddUser();
+    return 'test';
+  }
+
+  @Get('test/get/:id')
+  async getFirstUser(@Param(':id') id: number): Promise<string> {
+    const user: User = await this.userService.testGetUser(id);
+    if (user == null) {
+      return 'shit';
+    }
+    console.log(user);
+    return `id : ${user.id}, name: ${user.name}`;
   }
 }
