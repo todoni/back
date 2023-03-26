@@ -23,9 +23,6 @@ export class GameLog extends Common {
   @Column('bigint', { name: 'looser_id' })
   looserId: number;
 
-  @Column('varchar', { length: 20 })
-  title: string;
-
   @Column('smallint')
   score: number;
 
