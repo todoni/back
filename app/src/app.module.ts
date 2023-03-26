@@ -9,9 +9,17 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './module/auth.module';
 import { AuthController } from './controller/auth.controller';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forRoot(typeOrmConfig)],
+  imports: [
+    AuthModule,
+    TypeOrmModule.forRoot(typeOrmConfig),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
   // providers: [AppService, {provide: APP_FILTER , useClass: HttpExceptionFilter}],
