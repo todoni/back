@@ -8,13 +8,21 @@ export default class UserRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
-  // findUser(column: string, value: any, operator = '='): Promise<User | null> {
-  //   const query = this.createQueryBuilder('users').where(
-  //     `users.${column} ${operator} :value`,
-  //     {
-  //       value: value,
-  //     },
-  //   );
-  //   return query.getOne();
+  findUser(column: string, value: any, operator = '='): Promise<User | null> {
+    const query = this.createQueryBuilder('users').where(
+      `users.${column} ${operator} :value`,
+      {
+        value: value,
+      },
+    );
+    return query.getOne();
+  }
+
+  // findUser2(userId : number) : {
+  //   const query2 = this.createQueryBuilder('users')
+  //     .where('users.id = :id', )
+  //     .leftJoin();
+  //   // .innerJoinAndSelect('');
+
   // }
 }

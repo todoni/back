@@ -19,7 +19,6 @@ export class UserController {
       return { status: 400, message: 'shit' };
     }
     console.log(user);
-    // return `id : ${user.id}, name: ${user.name}`;
     return user;
   }
 }

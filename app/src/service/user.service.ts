@@ -18,20 +18,26 @@ export class UserService {
   }
 
   async testGetUser(user_id: number): Promise<User | null> {
-    console.log(`user_id1 = ${user_id}`);
-    const result = await this.userRepository.findOne({
-      where: { id: user_id },
-      relations: [
-        'sourceFriends',
-        'targetFriends',
-        'sourceBlocks',
-        'targetBlocks',
-        'achievements',
-        'winLogs',
-        'loseLogs',
-      ],
-    });
+    const result = this.userRepository.findUser('id', user_id);
     // const result = await this.userRepository.findUser('id', id);
     return result;
   }
+
+  // async testGetUser(user_id: number): Promise<User | null> {
+  //   console.log(`user_id1 = ${user_id}`);
+  //   const result = await this.userRepository.findOne({
+  //     where: { id: user_id },
+  //     relations: [
+  //       'sourceFriends',
+  //       'targetFriends',
+  //       'sourceBlocks',
+  //       'targetBlocks',
+  //       'achievements',
+  //       'winLogs',
+  //       'loseLogs',
+  //     ],
+  //   });
+  //   // const result = await this.userRepository.findUser('id', id);
+  //   return result;
+  // }
 }
