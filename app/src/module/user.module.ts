@@ -12,7 +12,7 @@ import repositories from 'src/util/repository';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService, ...repositories],
+  providers: [UserService,  ...repositories],
   exports: [UserService],
 })
 export class UserModule {}

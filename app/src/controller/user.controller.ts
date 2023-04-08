@@ -14,7 +14,7 @@ export class UserController {
 
   @Get('get/:id')
   async getFirstUser(@Param('id') id: number): Promise<object> {
-    const user: User = await this.userService.testGetUser(id);
+    const user: UserDetailDto = await this.userService.getUserDetail(id);
     if (user == null) {
       return { status: 400, message: 'shit' };
     }

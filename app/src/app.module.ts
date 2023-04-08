@@ -18,7 +18,6 @@ import GameLogRepository from './repository/game_log.repository';
 import AchievementRepository from './repository/achievement.repository';
 import UserAchievementRepository from './repository/user_achievement.repository';
 import { TestModule } from './module/test.moule';
-
 @Module({
   imports: [
     AuthModule,

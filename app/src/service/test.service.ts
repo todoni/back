@@ -34,6 +34,13 @@ export class TestService {
       twoFactorUid: '123',
       profile: '222',
     });
+    await this.userRepository.save({
+      name: 'name3',
+      nickname: 'alone',
+      twoFactor: true,
+      twoFactorUid: '123123123123',
+      profile: '123123123123',
+    });
 
     console.log('@@@ user 2명 추가');
 
