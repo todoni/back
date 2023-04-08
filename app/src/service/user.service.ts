@@ -55,4 +55,10 @@ export class UserService {
 
     return result;
   }
+
+  async hasNickname(nickname: string): Promise<boolean | null> {
+    const userList = await this.userRepository.find();
+    if (userList.some((e) => e.nickname === nickname)) return true;
+    return false;
+  }
 }
