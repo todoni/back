@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { UserDetailDto } from 'src/dto/user.dto';
 import { User } from 'src/entity/user.entity';
 import { UserService } from 'src/service/user.service';
@@ -20,5 +20,14 @@ export class UserController {
     }
     console.log(user);
     return user;
+  }
+
+  @Get('nickname')
+  async checkSameNick(@Query('name') name: string): Promise<object> {
+    const hasNick: boolean = await this.userService.hasNickname(name);
+    if (hasNick) {
+      return { status: 400, message: 'Already has nick ' + name };
+    }
+    return { status: 200, message: 'You can use nick ' + name };
   }
 }
