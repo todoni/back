@@ -22,6 +22,9 @@ export class User extends Common {
   @Column('varchar', { length: 20 })
   name: string;
 
+  @Column('varchar', { length: 20 })
+  nickname: string;
+
   @Column({ name: 'tw_factor', default: false })
   twoFactor: boolean;
 
@@ -45,11 +48,9 @@ export class User extends Common {
   @OneToMany(() => Block, (block) => block.targetUser, { cascade: true })
   targetBlocks: Block[];
 
-  @OneToMany(
-    () => UserAchievement,
-    (UserAchievement) => UserAchievement.achievement,
-    { cascade: true },
-  )
+  @OneToMany(() => UserAchievement, (UserAchievement) => UserAchievement.user, {
+    cascade: true,
+  })
   achievements: UserAchievement[];
 
   @OneToMany(() => GameLog, (log) => log.winner, { cascade: true })
