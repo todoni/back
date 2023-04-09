@@ -9,13 +9,29 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "baseUrl": "./",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@config/*": ["./src/config/*"],
+      "@controller/*": ["./src/controller/*"],
+      "@dto/*": ["./src/dto/*"],
+      "@entity/*": ["./src/entity/*"],
+      "@filter/*": ["./src/filter/*"],
+      "@guard/*": ["./src/guard/*"],
+      "@interceptor/*": ["./src/interceptor/*"],
+      "@middleware/*": ["./src/middleware/*"],
+      "@module/*": ["./src/module/*"],
+      "@pipe/*": ["./src/pipe/*"],
+      "@repository/*": ["./src/repository/*"],
+      "@service/*": ["./src/service/*"],
+      "@strategy/*": ["./src/strategy/*"]
+    }
   }
 }

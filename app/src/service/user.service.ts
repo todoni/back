@@ -27,6 +27,10 @@ export class UserService {
     });
   }
 
+  async findByUserId(userId: number): Promise<User> {
+    return await this.userRepository.findUser(userId);
+  }
+
   async getUserDetail(userId: number): Promise<UserDetailDto | null> {
     const userList = await this.userRepository.find();
     const friendList = await this.friendRepository.findFriends(userId);
