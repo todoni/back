@@ -8,10 +8,7 @@ export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
   async tokenTest(name: string, id: number) {
-    console.log(name);
-    console.log(id);
-    console.log(this.jwtService);
-    const payload = { username: name, sub: id };
+    const payload = { name: name, sub: id };
     return { access_token: this.jwtService.sign(payload) };
   }
 }

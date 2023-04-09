@@ -42,7 +42,7 @@ export class UserDetailDto {
       userList.find((ele) => ele.id == value.targetId),
     );
     //////////////////////////////////////////////////////////
-    const blockSourceList = friendList.filter((ele) => ele.sourceId == user.id);
+    const blockSourceList = blockList.filter((ele) => ele.sourceId == user.id);
     temp.blocks = blockSourceList.map((value) =>
       userList.find((ele) => ele.id == value.targetId),
     );

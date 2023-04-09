@@ -1,5 +1,5 @@
-import { ExtractJwt } from 'passport-jwt';
-import { Strategy } from 'passport-local';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+// import { Strategy } from 'passport-local';
 
 import { PassportStrategy } from '@nestjs/passport';
 import {
@@ -20,7 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      // jwtFromRequest: ExtractJwt.fromHeader('123'),
+      ignoreExpiration: true,
       secretOrKey: process.env.JWT_SECRET,
       passReqToCallback: true,
     });
@@ -32,15 +33,15 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     console.log('payload:');
     console.log(payload);
 
-    if (
-      (req.url !== '/auth/login' && payload.type === 'sign') ||
-      (req.url === '/auth/login' && payload.type !== 'sign')
-    ) {
-      console.log(
-        "req.url !== '/auth/login' && payload.type === 'sign' 여기로 들어옴",
-      );
-      throw new ForbiddenException();
-    }
+    // if (
+    //   (req.url !== '/auth/login' && payload.type === 'sign') ||
+    //   (req.url === '/auth/login' && payload.type !== 'sign')
+    // ) {
+    //   console.log(
+    //     "req.url !== '/auth/login' && payload.type === 'sign' 여기로 들어옴",
+    //   );
+    //   throw new ForbiddenException();
+    // }
 
     // if (req.url !== '/v0/auth/token' && now > payload.exp) {
     // //   if (req.url === '/v0/auth/login/access')
@@ -55,6 +56,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     //   throw new UnauthorizedException();
     // }
 
-    return await this.userService.findByUserId(payload.id);
+    return await this.userService.findByUserId(payload.sub);
   }
 }
