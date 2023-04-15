@@ -10,11 +10,13 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { User } from '@entity/user.entity';
 import { UserService } from '@src/service/user.service';
+import { AuthService } from '@src/service/auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly configService: ConfigService,
+    private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {
     super({
@@ -56,6 +58,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     //   throw new UnauthorizedException();
     // }
 
-    return await this.userService.findByUserId(req['sub']);
+    if (now > req['exp']) {
+      if (req['firstAccess'] == true) {
+        await this.authService.expireFirstAccess(req['id']);
+      }
+      throw new UnauthorizedException();
+    }
+
+    return await this.userService.findByUserId(req['id']);
   }
 }

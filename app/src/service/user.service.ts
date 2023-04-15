@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Achievement } from 'src/entity/achievement.entity';
 import { User } from 'src/entity/user.entity';
 import UserRepository from 'src/repository/user.repository';
@@ -6,7 +6,7 @@ import FriendRepository from 'src/repository/friend.repository';
 import BlockRepository from 'src/repository/block.repository';
 import GameLogRepository from 'src/repository/game_log.repository';
 import UserAchievementRepository from 'src/repository/user_achievement.repository';
-import { UserDetailDto } from 'src/dto/user.dto';
+import { UserAccessDto, UserDetailDto, UserDto } from 'src/dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -30,6 +30,25 @@ export class UserService {
   async findByUserId(userId: number): Promise<User> {
     const result = await this.userRepository.findUser(userId);
     return result;
+  }
+
+  async findUserByUsername(username: string): Promise<User | null> {
+    return await this.userRepository.findUserByName(username);
+  }
+
+  async createUser(userDto: UserDto) {
+    const user = this.userRepository.create();
+
+    user.id = userDto.id;
+    user.name = userDto.name;
+    user.nickname = userDto.nickname;
+    user.twoFactor = userDto.twFactor;
+    user.twoFactorUid = userDto.twFactorUid;
+    user.profile = userDto.profile;
+
+    await this.userRepository.save(userDto);
+
+    return user;
   }
 
   async getUserDetail(user: User): Promise<UserDetailDto | null> {
@@ -78,5 +97,17 @@ export class UserService {
     const userList = await this.userRepository.find();
     if (userList.some((e) => e.nickname === nickname)) return true;
     return false;
+  }
+
+  async firstAccess(user: User, userAccessDto: UserAccessDto) {
+    if (!user.firstAccess) throw new ForbiddenException();
+
+    userAccessDto.firstAccess = false;
+
+    await this.userRepository.updateFirstAccess(user.id, userAccessDto);
+  }
+
+  async deleteUserByEntity(user: User) {
+    await this.userRepository.delete(user);
   }
 }

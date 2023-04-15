@@ -5,6 +5,16 @@ import { GameLog } from 'src/entity/game_log.entity';
 import { User } from 'src/entity/user.entity';
 import { UserAchievement } from 'src/entity/user_achievement';
 
+export class UserDto {
+  id: number;
+  name: string;
+  nickname: string;
+  twFactor: boolean;
+  twFactorUid: string;
+  profile: string;
+  firstAccess: boolean;
+}
+
 export class UserDetailDto {
   name: string;
   nickname: string;
@@ -69,4 +79,14 @@ export class UserLog {
 export class UserAchievementDto {
   achivementTitle: string;
   isDone: boolean;
+}
+
+export class UserAccessDto {
+  displayName: string;
+
+  email: string;
+
+  firstAccess?: boolean;
+
+  twoFactor: boolean;
 }

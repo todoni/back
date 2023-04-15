@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from '@src/strategy/jwt.strategy';
 import { UserModule } from './user.module';
 import { AuthService } from '@src/service/auth.service';
+import { TokenInterceptor } from '@src/interceptor/token.interceptor';
 
 @Module({
   imports: [
@@ -18,19 +19,20 @@ import { AuthService } from '@src/service/auth.service';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { algorithm: 'HS256', expiresIn: '5m' },
+        signOptions: { algorithm: 'HS256', expiresIn: '1d' },
       }),
     }),
     UserModule,
   ],
   controllers: [AuthController],
   providers: [
+    TokenInterceptor,
     AuthService,
     JwtStrategy,
     ConfigService,
     FtStrategy,
     ...repositories,
   ],
-  exports: [AuthService],
+  exports: [AuthService, TokenInterceptor],
 })
 export class AuthModule {}

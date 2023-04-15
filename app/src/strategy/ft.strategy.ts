@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { UserService } from '@src/service/user.service';
 import { Strategy } from 'passport-42';
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+  ) {
     super({
-      // clientID: configService.get('ftConfig.uid'),
-      // clientSecret: configService.get('ftConfig.secret'),
-      // callbackURL: configService.get('ftConfig.redirectUri'),
       clientID: configService.get('CLIENT_ID_42'),
       clientSecret: configService.get('CLIENT_SECRET_42'),
       callbackURL: configService.get('CALL_BACK_URL'),
@@ -21,19 +22,19 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
     refreshToken: string,
     profile: any,
   ): Promise<any> {
-    console.log('@###@@@@@@######################');
-    console.log(profile._json);
     const user = await this.userService.findUserByUsername(profile['username']);
 
     if (!user) {
       return await this.userService.createUser({
         id: profile._json['id'],
-        username: profile._json['login'],
-        displayName: profile._json['login'],
-        email: profile._json['email'],
-        imagePath: profile._json['image']['link'],
+        name: profile._json['login'],
+        nickname: profile._json['login'],
+        twFactor: false,
+        twFactorUid: '',
+        profile: profile._json['image']['link'],
+        firstAccess: true,
       });
     }
-    return 1;
+    return user;
   }
 }

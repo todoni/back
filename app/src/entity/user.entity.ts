@@ -34,6 +34,9 @@ export class User extends Common {
   @Column('varchar', { length: 255 })
   profile: string;
 
+  @Column({ name: 'first_access', default: false })
+  firstAccess: boolean;
+
   @Column('varchar', { name: 'refresh_token', length: 255, nullable: true })
   refreshToken: string;
 
