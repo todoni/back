@@ -37,4 +37,11 @@ export class AuthController {
     console.log('Enter callback controller!');
     return { status: 200, message: 'OK' };
   }
+
+  @Get('/token/check')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(TokenInterceptor)
+  checkToken(): AuthResponseDto {
+    return { status: 200, message: 'OK' };
+  }
 }
