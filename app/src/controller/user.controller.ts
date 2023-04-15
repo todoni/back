@@ -14,32 +14,24 @@ export class UserController {
     return 'test';
   }
 
-  //Todo: user 어차피 가지고 있기 때문에 그냥 user찾지말고 user를 넘기자
-  //Todo: JWT적용
-  //Todo: cookie 적용
-  @Get('get/:id')
-  async getFirstUser(@Param('id') id: number): Promise<object> {
-    const user: UserDetailDto = await this.userService.getUserDetail(id);
+  @Get('detail')
+  @UseGuards(JwtAuthGuard)
+  async getMyDetail(@Req() req): Promise<object> {
+    const user: UserDetailDto = await this.userService.getUserDetail(req.user);
+    if (user == null) {
+      return { status: 400, message: 'shit' };
+    }
+    return user;
+  }
+
+  @Get('detail/:id')
+  @UseGuards(JwtAuthGuard)
+  async getUserDetailById(@Param('id') id: number): Promise<object> {
+    const user: UserDetailDto = await this.userService.getUserDetailById(id);
     if (user == null) {
       return { status: 400, message: 'shit' };
     }
     console.log(user);
-    return user;
-  }
-
-  //Todo: @@@@@@@@@@@@@@@ jwt 검증 때 user detail을 가져오니까 그거 활용해서 하자
-  @Get('get/:id/token-test')
-  @UseGuards(JwtAuthGuard)
-  async tokenTest(@Param('id') id: number, @Req() req): Promise<object> {
-    console.log('@@@@@@@@@@@@@@');
-    console.log(req.user);
-    console.log('@@@@@@@@@@@@@@');
-    console.log(req.cookies);
-    console.log('@@@@@@@@@@@@@@');
-    const user: UserDetailDto = await this.userService.getUserDetail(id);
-    if (user == null) {
-      return { status: 400, message: 'shit' };
-    }
     return user;
   }
 

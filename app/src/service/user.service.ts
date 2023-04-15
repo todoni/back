@@ -32,7 +32,27 @@ export class UserService {
     return result;
   }
 
-  async getUserDetail(userId: number): Promise<UserDetailDto | null> {
+  async getUserDetail(user: User): Promise<UserDetailDto | null> {
+    const userList = await this.userRepository.find();
+    const friendList = await this.friendRepository.findFriends(user.id);
+    const blockList = await this.blockRepository.findBlocks(user.id);
+    const gameLogList = await this.gameLogRepository.findGameLogs(user.id);
+    const userAchievementList =
+      await this.userAchievementRepository.findUserAchievement(user.id);
+
+    const result: UserDetailDto = UserDetailDto.fromData(
+      user,
+      userList,
+      friendList,
+      blockList,
+      gameLogList,
+      userAchievementList,
+    );
+
+    return result;
+  }
+
+  async getUserDetailById(userId: number): Promise<UserDetailDto | null> {
     const userList = await this.userRepository.find();
     const friendList = await this.friendRepository.findFriends(userId);
     const blockList = await this.blockRepository.findBlocks(userId);
@@ -40,16 +60,7 @@ export class UserService {
     const userAchievementList =
       await this.userAchievementRepository.findUserAchievement(userId);
 
-    //Todo: user 어차피 가지고 있기 때문에 그냥 user찾지말고 user를 넘기자
     const user = userList.find((e) => e.id == userId);
-
-    // console.log('===========================');
-    // console.log(userList);
-    // console.log(friendList);
-    // console.log(blockList);
-    // console.log(gameLogList);
-    // console.log(userAchievementList);
-    // console.log('===========================');
 
     const result: UserDetailDto = UserDetailDto.fromData(
       user,
