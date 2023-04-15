@@ -1,5 +1,4 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
-// import { Strategy } from 'passport-local';
 
 import { PassportStrategy } from '@nestjs/passport';
 import {
@@ -19,19 +18,20 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private readonly userService: UserService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // jwtFromRequest: ExtractJwt.fromHeader('123'),
-      ignoreExpiration: true,
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request) => request.cookies.token,
+      ]),
+      ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
-      passReqToCallback: true,
     });
   }
 
   async validate(req: Request, payload: any): Promise<User> {
     const now = Date.parse(Date()) / 1000;
 
-    console.log('payload:');
-    console.log(payload);
+    console.log('req:');
+    console.log(req);
+    console.log('req done');
 
     // if (
     //   (req.url !== '/auth/login' && payload.type === 'sign') ||
@@ -56,6 +56,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     //   throw new UnauthorizedException();
     // }
 
-    return await this.userService.findByUserId(payload.sub);
+    return await this.userService.findByUserId(req['sub']);
   }
 }

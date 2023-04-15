@@ -27,15 +27,19 @@ export class UserController {
     return user;
   }
 
+  //Todo: @@@@@@@@@@@@@@@ jwt 검증 때 user detail을 가져오니까 그거 활용해서 하자
   @Get('get/:id/token-test')
   @UseGuards(JwtAuthGuard)
   async tokenTest(@Param('id') id: number, @Req() req): Promise<object> {
+    console.log('@@@@@@@@@@@@@@');
     console.log(req.user);
+    console.log('@@@@@@@@@@@@@@');
+    console.log(req.cookies);
+    console.log('@@@@@@@@@@@@@@');
     const user: UserDetailDto = await this.userService.getUserDetail(id);
     if (user == null) {
       return { status: 400, message: 'shit' };
     }
-    console.log(user);
     return user;
   }
 

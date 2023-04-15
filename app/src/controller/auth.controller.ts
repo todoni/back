@@ -46,15 +46,14 @@ export class AuthController {
   async tokenTest(
     @Query('name') name: string,
     @Query('id') id: number,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ): Promise<any> {
     const result = await this.authService.tokenTest(name, id);
 
-    res.status(HttpStatus.CREATED);
-    res.setHeader('Authorization', 'Bearer' + result.access_token);
-    res.cookie('jwt', result.access_token, {
+    res.cookie('token', result.access_token, {
       httpOnly: true,
       maxAge: 5 * 24 * 60 * 60 * 1000,
+      domain: '43.200.11.197',
     });
     return res.send({ message: 'hi sohan' });
   }
