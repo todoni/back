@@ -50,6 +50,9 @@ export class TestService {
     const user2 = await this.userRepository.findOne({
       where: { name: 'name2' },
     });
+    const user3 = await this.userRepository.findOne({
+      where: { name: 'name3' },
+    });
 
     console.log('@@@ user 2명 불러오기');
     console.log(user1);
@@ -61,12 +64,21 @@ export class TestService {
       targetId: user2.id,
     });
 
+    this.friendRepository.save({
+      sourceId: user1.id,
+      targetId: user3.id,
+    });
+
+    this.friendRepository.save({
+      sourceId: user3.id,
+      targetId: user1.id,
+    });
     console.log('@@@ friend 설정 완');
 
     //Block
     this.blockRepository.save({
-      sourceId: user1.id,
-      targetId: user2.id,
+      sourceId: user2.id,
+      targetId: user1.id,
     });
 
     console.log('@@@ block 설정 완');
@@ -75,6 +87,20 @@ export class TestService {
     this.gameLogRepository.save({
       winnerId: user1.id,
       looserId: user2.id,
+      score: 29,
+    });
+
+    //GameLog
+    this.gameLogRepository.save({
+      winnerId: user1.id,
+      looserId: user2.id,
+      score: 31,
+    });
+
+    //GameLog
+    this.gameLogRepository.save({
+      winnerId: user3.id,
+      looserId: user1.id,
       score: 29,
     });
 
@@ -101,6 +127,10 @@ export class TestService {
       where: { title: '업적2' },
     });
 
+    const ach3 = await this.achievementRepository.findOne({
+      where: { title: '업적3' },
+    });
+
     console.log('@@@ 업적 중 1, 2 불러오기');
     console.log(ach1);
     console.log(ach2);
@@ -118,6 +148,10 @@ export class TestService {
     await this.userAchievementRepository.save({
       userId: user2.id,
       achievementId: ach1.id,
+    });
+    await this.userAchievementRepository.save({
+      userId: user3.id,
+      achievementId: ach3.id,
     });
 
     console.log('@@@ 업적 설정 완');

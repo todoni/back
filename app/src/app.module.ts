@@ -18,9 +18,12 @@ import GameLogRepository from './repository/game_log.repository';
 import AchievementRepository from './repository/achievement.repository';
 import UserAchievementRepository from './repository/user_achievement.repository';
 import { TestModule } from './module/test.moule';
+import { JwtModule } from '@nestjs/jwt';
+
 @Module({
   imports: [
     AuthModule,
+    JwtModule,
     UserModule,
     TestModule,
     TypeOrmModule.forRoot(typeOrmConfig),
