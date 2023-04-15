@@ -30,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const now = Date.parse(Date()) / 1000;
 
     console.log('req:');
-    console.log(req);
+    // console.log(req);
     console.log('req done');
 
     // if (
@@ -56,6 +56,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     //   throw new UnauthorizedException();
     // }
 
-    return await this.userService.findByUserId(req['sub']);
+    return await this.userService.findByUserId(req['id']);
   }
 }

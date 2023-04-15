@@ -5,6 +5,15 @@ import { GameLog } from 'src/entity/game_log.entity';
 import { User } from 'src/entity/user.entity';
 import { UserAchievement } from 'src/entity/user_achievement';
 
+export class UserDto {
+  id: number;
+  name: string;
+  nickname: string;
+  twFactor: boolean;
+  twFactorUid: string;
+  profile: string;
+}
+
 export class UserDetailDto {
   name: string;
   nickname: string;

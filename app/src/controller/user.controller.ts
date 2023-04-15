@@ -35,8 +35,6 @@ export class UserController {
     return user;
   }
 
-  //Todo: JWT적용
-  //Todo: cookie 적용
   @Get('nickname')
   @UseGuards(JwtAuthGuard)
   async checkSameNick(@Query('name') name: string): Promise<object> {

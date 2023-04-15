@@ -6,9 +6,8 @@ import {
   Post,
   Body,
   UseGuards,
-  Req,
-  Res,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 
 import { Request, Response } from 'express';
@@ -18,6 +17,7 @@ import { JwtAuthGuard } from '@src/guard/jwt.guard';
 import { AuthService } from '@src/service/auth.service';
 import { AuthResponseDto } from 'src/dto/auth.dto';
 import { FtAuthGuard } from 'src/guard/ft.guard';
+import { TokenInterceptor } from '@src/interceptor/token.interceptor';
 
 @Controller('auth')
 export class AuthController {
@@ -30,31 +30,11 @@ export class AuthController {
     return { status: 200, message: 'OK' };
   }
 
-  //Todo: 성공 시 토큰도 함께 넘겨줘야함
   @Get('login/callback')
   @UseGuards(FtAuthGuard)
-  async callback(
-    @Query('code') query: string,
-    @Req() req,
-  ): Promise<AuthResponseDto> {
+  @UseInterceptors(TokenInterceptor)
+  async callback(@Query('code') query: string): Promise<AuthResponseDto> {
     console.log('Enter callback controller!');
     return { status: 200, message: 'OK' };
-  }
-
-  //Todo: 지우기~
-  @Get('token-test')
-  async tokenTest(
-    @Query('name') name: string,
-    @Query('id') id: number,
-    @Res() res: Response,
-  ): Promise<any> {
-    const result = await this.authService.tokenTest(name, id);
-
-    res.cookie('token', result.access_token, {
-      httpOnly: true,
-      maxAge: 5 * 24 * 60 * 60 * 1000,
-      domain: '43.200.11.197',
-    });
-    return res.send({ message: 'hi sohan' });
   }
 }

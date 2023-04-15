@@ -6,7 +6,7 @@ import FriendRepository from 'src/repository/friend.repository';
 import BlockRepository from 'src/repository/block.repository';
 import GameLogRepository from 'src/repository/game_log.repository';
 import UserAchievementRepository from 'src/repository/user_achievement.repository';
-import { UserDetailDto } from 'src/dto/user.dto';
+import { UserDetailDto, UserDto } from 'src/dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -30,6 +30,25 @@ export class UserService {
   async findByUserId(userId: number): Promise<User> {
     const result = await this.userRepository.findUser(userId);
     return result;
+  }
+
+  async findUserByUsername(username: string): Promise<User | null> {
+    return await this.userRepository.findUserByName(username);
+  }
+
+  async createUser(userDto: UserDto) {
+    const user = this.userRepository.create();
+
+    user.id = userDto.id;
+    user.name = userDto.name;
+    user.nickname = userDto.nickname;
+    user.twoFactor = userDto.twFactor;
+    user.twoFactorUid = userDto.twFactorUid;
+    user.profile = userDto.profile;
+
+    await this.userRepository.save(userDto);
+
+    return user;
   }
 
   async getUserDetail(user: User): Promise<UserDetailDto | null> {
