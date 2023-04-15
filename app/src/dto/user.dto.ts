@@ -12,6 +12,7 @@ export class UserDto {
   twFactor: boolean;
   twFactorUid: string;
   profile: string;
+  firstAccess: boolean;
 }
 
 export class UserDetailDto {
@@ -78,4 +79,14 @@ export class UserLog {
 export class UserAchievementDto {
   achivementTitle: string;
   isDone: boolean;
+}
+
+export class UserAccessDto {
+  displayName: string;
+
+  email: string;
+
+  firstAccess?: boolean;
+
+  twoFactor: boolean;
 }

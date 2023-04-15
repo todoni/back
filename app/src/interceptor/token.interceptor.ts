@@ -11,11 +11,13 @@ import { AuthService } from '@service/auth.service';
 import { AuthResponseDto, TokenDto } from '@dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@src/entity/user.entity';
+import { UserService } from '@src/service/user.service';
 
 @Injectable()
 export class TokenInterceptor implements NestInterceptor {
   constructor(
     private readonly authService: AuthService,
+    private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -26,7 +28,8 @@ export class TokenInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map(async (result: AuthResponseDto) => {
         const res: Response = context.switchToHttp().getResponse();
-        const user: User = context.switchToHttp().getRequest().user;
+        const temp: User = context.switchToHttp().getRequest().user;
+        const user = await this.userService.findUserByUsername(temp.name);
 
         // if (result.firstAccess) {
         //   token.sign = this.authService.generateSignCode(userId);
@@ -51,11 +54,7 @@ export class TokenInterceptor implements NestInterceptor {
         });
         res.header('token', tokenResult.access_token);
 
-        if (result.status === 302) {
-          res.redirect(this.configService.get('serverConfig.clientUrl'));
-        } else {
-          return { status: result.status };
-        }
+        return result;
       }),
     );
   }

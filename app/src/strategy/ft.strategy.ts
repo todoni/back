@@ -32,6 +32,7 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
         twFactor: false,
         twFactorUid: '',
         profile: profile._json['image']['link'],
+        firstAccess: true,
       });
     }
     return user;
