@@ -1,12 +1,11 @@
+import { UserAccessDto, UserDetailDto, UserDto } from '@dto/user.dto';
+import { User } from '@entity/user.entity';
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Achievement } from 'src/entity/achievement.entity';
-import { User } from 'src/entity/user.entity';
-import UserRepository from 'src/repository/user.repository';
-import FriendRepository from 'src/repository/friend.repository';
-import BlockRepository from 'src/repository/block.repository';
-import GameLogRepository from 'src/repository/game_log.repository';
-import UserAchievementRepository from 'src/repository/user_achievement.repository';
-import { UserAccessDto, UserDetailDto, UserDto } from 'src/dto/user.dto';
+import BlockRepository from '@repository/block.repository';
+import FriendRepository from '@repository/friend.repository';
+import GameLogRepository from '@repository/game_log.repository';
+import UserRepository from '@repository/user.repository';
+import UserAchievementRepository from '@repository/user_achievement.repository';
 
 @Injectable()
 export class UserService {
@@ -27,7 +26,7 @@ export class UserService {
     });
   }
 
-  async findByUserId(userId: number): Promise<User> {
+  async findByUserId(userId: number): Promise<User | null> {
     const result = await this.userRepository.findUser(userId);
     return result;
   }
@@ -79,7 +78,7 @@ export class UserService {
     const userAchievementList =
       await this.userAchievementRepository.findUserAchievement(userId);
 
-    const user = userList.find((e) => e.id == userId);
+    const user = userList.find((e) => e.id === userId);
 
     const result: UserDetailDto = UserDetailDto.fromData(
       user,

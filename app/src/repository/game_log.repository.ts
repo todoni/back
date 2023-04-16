@@ -9,10 +9,10 @@ export default class GameLogRepository extends Repository<GameLog> {
     super(GameLog, dataSource.createEntityManager());
   }
 
-  findGameLogs(userId : number) : Promise<GameLog[] | null>{
+  findGameLogs(userId: number): Promise<GameLog[]> {
     const query = this.createQueryBuilder('game_logs')
-      .where('game_logs.winner_id = :userId', {userId : userId})
-      .orWhere('game_logs.looser_id = :userId', {userId : userId})
+      .where('game_logs.winner_id = :userId', { userId: userId })
+      .orWhere('game_logs.looser_id = :userId', { userId: userId })
       .getMany();
     return query;
   }

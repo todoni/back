@@ -9,7 +9,6 @@ export default class FriendRepository extends Repository<Friend> {
     super(Friend, dataSource.createEntityManager());
   }
 
-
   // findFriend(column: string, value: any, operator = '='): Promise<Friend | null> {
   //   const query = this.createQueryBuilder('friends')
   //   .subQuery()
@@ -22,12 +21,10 @@ export default class FriendRepository extends Repository<Friend> {
   //   return query.getOne();
   // }
 
-  findFriends(userId : number) : Promise<Friend[] | null>{
+  findFriends(userId: number): Promise<Friend[]> {
     const query = this.createQueryBuilder('friends')
-      .where('friends.source_id = :userId', {userId : userId})
-      .orWhere('friends.target_id = :userId', {userId : userId})
+      .where('friends.source_id = :userId', { userId: userId })
       .getMany();
     return query;
   }
-
 }

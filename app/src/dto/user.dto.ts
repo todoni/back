@@ -46,19 +46,19 @@ export class UserDetailDto {
     temp.level = gameLogList.length * 10;
     //////////////////////////////////////////////////////////
     const friendSourceList = friendList.filter(
-      (ele) => ele.sourceId == user.id,
+      (ele) => ele.sourceId === user.id,
     );
     temp.friends = friendSourceList.map((value) =>
-      userList.find((ele) => ele.id == value.targetId),
+      userList.find((ele) => ele.id === value.targetId),
     );
     //////////////////////////////////////////////////////////
-    const blockSourceList = blockList.filter((ele) => ele.sourceId == user.id);
+    const blockSourceList = blockList.filter((ele) => ele.sourceId === user.id);
     temp.blocks = blockSourceList.map((value) =>
-      userList.find((ele) => ele.id == value.targetId),
+      userList.find((ele) => ele.id === value.targetId),
     );
     //////////////////////////////////////////////////////////
     temp.winPercent =
-      (gameLogList.filter((ele) => ele.winnerId == user.id).length /
+      (gameLogList.filter((ele) => ele.winnerId === user.id).length /
         gameLogList.length) *
       100;
     temp.userLogs = [];
