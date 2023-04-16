@@ -9,8 +9,8 @@ export default class BlockRepository extends Repository<Block> {
     super(Block, dataSource.createEntityManager());
   }
 
-  findBlocks(userId: number): Promise<Block[]> {
-    const query = this.createQueryBuilder('blocks')
+  async findBlocks(userId: number): Promise<Block[]> {
+    const query = await this.createQueryBuilder('blocks')
       .where('blocks.source_id = :userId', { userId: userId })
       .orWhere('blocks.target_id = :userId', { userId: userId })
       .getMany();

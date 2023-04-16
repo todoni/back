@@ -21,8 +21,8 @@ export default class FriendRepository extends Repository<Friend> {
   //   return query.getOne();
   // }
 
-  findFriends(userId: number): Promise<Friend[]> {
-    const query = this.createQueryBuilder('friends')
+  async findFriends(userId: number): Promise<Friend[]> {
+    const query = await this.createQueryBuilder('friends')
       .where('friends.source_id = :userId', { userId: userId })
       .getMany();
     return query;

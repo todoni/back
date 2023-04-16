@@ -10,8 +10,8 @@ export default class UserRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
-  findUser(userId: number): Promise<User | null> {
-    const query = this.createQueryBuilder('users')
+  async findUser(userId: number): Promise<User | null> {
+    const query = await this.createQueryBuilder('users')
       .where('users.id = :userId', { userId: userId })
       .getOne();
     return query;

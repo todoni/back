@@ -9,8 +9,8 @@ export default class UserAchievementRepository extends Repository<UserAchievemen
     super(UserAchievement, dataSource.createEntityManager());
   }
 
-  findUserAchievement(userId: number): Promise<UserAchievement[]> {
-    const query = this.createQueryBuilder('user_achievements')
+  async findUserAchievement(userId: number): Promise<UserAchievement[]> {
+    const query = await this.createQueryBuilder('user_achievements')
       .where('user_achievements.user_id = :userId', { userId: userId })
       .getMany();
     return query;
