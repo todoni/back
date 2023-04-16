@@ -6,7 +6,7 @@ import FriendRepository from 'src/repository/friend.repository';
 import BlockRepository from 'src/repository/block.repository';
 import GameLogRepository from 'src/repository/game_log.repository';
 import UserAchievementRepository from 'src/repository/user_achievement.repository';
-import { UserAccessDto, UserDetailDto, UserDto } from 'src/dto/user.dto';
+import { UserAccessDto, UserDetailDto, UserDto } from '@dto/user/user.dto';
 
 @Injectable()
 export class UserService {

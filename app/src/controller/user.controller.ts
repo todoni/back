@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@src/guard/jwt.guard';
-import { UserDetailDto } from 'src/dto/user.dto';
+import { UserDetailDto } from '@dto/user/user.dto';
 import { User } from 'src/entity/user.entity';
 import { UserService } from 'src/service/user.service';
 import { Req } from '@nestjs/common';
