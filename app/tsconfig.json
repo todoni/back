@@ -18,7 +18,6 @@
     "noFallthroughCasesInSwitch": false,
     "baseUrl": "./",
     "paths": {
-      "@src/*": ["./src/*"],
       "@config/*": ["./src/config/*"],
       "@controller/*": ["./src/controller/*"],
       "@dto/*": ["./src/dto/*"],
@@ -30,8 +29,9 @@
       "@module/*": ["./src/module/*"],
       "@pipe/*": ["./src/pipe/*"],
       "@repository/*": ["./src/repository/*"],
-      "@service/*": ["./src/service/*"],
-      "@strategy/*": ["./src/strategy/*"]
+      "@service/*": ["src/strategy/service/*"],
+      "@strategy/*": ["./src/strategy/*"],
+      "@src/*": ["./src/*"]
     }
   }
 }

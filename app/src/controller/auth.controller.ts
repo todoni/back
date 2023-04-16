@@ -48,4 +48,9 @@ export class AuthController {
   checkToken(): AuthResponseDto {
     return { status: 200, message: 'OK' };
   }
+
+  @Get('/test')
+  async testToken(): Promise<any> {
+    return { token: await this.authService.getJwtToken('name1', 1) };
+  }
 }

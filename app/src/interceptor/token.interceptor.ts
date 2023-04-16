@@ -7,7 +7,7 @@ import {
 import { map, Observable } from 'rxjs';
 import { Response } from 'express';
 
-import { AuthService } from '@service/auth.service';
+import { AuthService } from '@src/service/auth.service';
 import { AuthResponseDto, TokenDto } from '@dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@src/entity/user.entity';

@@ -51,7 +51,7 @@ export class UserService {
     return user;
   }
 
-  async getUserDetail(user: User): Promise<UserDetailDto | null> {
+  async getUserDetail(user: User): Promise<UserDetailDto> {
     const userList = await this.userRepository.find();
     const friendList = await this.friendRepository.findFriends(user.id);
     const blockList = await this.blockRepository.findBlocks(user.id);

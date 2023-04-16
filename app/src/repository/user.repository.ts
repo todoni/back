@@ -12,14 +12,14 @@ export default class UserRepository extends Repository<User> {
 
   findUser(userId: number): Promise<User | null> {
     const query = this.createQueryBuilder('users')
-      .where('users.id =  :userId', { userId: userId })
+      .where('users.id = :userId', { userId: userId })
       .getOne();
     return query;
   }
 
-  findUserByName(name: string): Promise<User | null> {
-    const query = this.createQueryBuilder('users')
-      .where('users.name =  :username', { username: name })
+  async findUserByName(name: string): Promise<User | null> {
+    const query = await this.createQueryBuilder('users')
+      .where('users.name = :username', { username: name })
       .getOne();
     return query;
   }
