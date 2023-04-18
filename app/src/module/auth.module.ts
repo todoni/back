@@ -10,6 +10,7 @@ import { JwtStrategy } from '@src/strategy/jwt.strategy';
 import { UserModule } from './user.module';
 import { AuthService } from '@src/service/auth.service';
 import { TokenInterceptor } from '@src/interceptor/token.interceptor';
+import { Algorithm } from 'node_modules/@types/jsonwebtoken/index';
 
 @Module({
   imports: [
@@ -19,7 +20,10 @@ import { TokenInterceptor } from '@src/interceptor/token.interceptor';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { algorithm: 'HS256', expiresIn: '1d' },
+        signOptions: {
+          algorithm: configService.get<Algorithm>('JWT_ALGORITHM'),
+          expiresIn: configService.get<string>('JWT_EXPIRED_IN'),
+        },
       }),
     }),
     UserModule,

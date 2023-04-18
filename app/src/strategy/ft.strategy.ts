@@ -17,7 +17,11 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
     });
   }
 
-  async validate(profile: any): Promise<any> {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+  ): Promise<any> {
     const user = await this.userService.findUserByUsername(profile['username']);
 
     if (!user) {

@@ -4,11 +4,11 @@ import { MiddlewareConsumer } from '@nestjs/common';
 import { logger, LoggerMiddleware } from './middleware/logger.middleware';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './filter/http-exception.filter';
-import { typeOrmConfig } from './config/typeorm.config';
+import { envConfig, envValidation } from './config/typeorm.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './module/auth.module';
 import { AuthController } from './controller/auth.controller';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './module/user.module';
 import UserRepository from './repository/user.repository';
 import FriendRepository from './repository/friend.repository';
@@ -25,22 +25,52 @@ import { JwtModule } from '@nestjs/jwt';
     JwtModule,
     UserModule,
     TestModule,
-    TypeOrmModule.forRoot(typeOrmConfig),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [envConfig],
+      validationSchema: envValidation(),
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('dbConfig.host'),
+        port: configService.get('dbConfig.port'),
+        username: configService.get('dbConfig.username'),
+        password: configService.get('dbConfig.password'),
+        database: configService.get('dbConfig.name'),
+      }),
     }),
   ],
   providers: [AppService],
-  // providers: [AppService, {provide: APP_FILTER , useClass: HttpExceptionFilter}],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     //미들웨어
-    consumer.apply(LoggerMiddleware).forRoutes(AuthController);
-    // .exclude({ path: 'cats', method: RequestMethod.GET }, { path: 'cats', method: RequestMethod.POST }, 'cats/(.*)')
-    // .forRoutes('cats/test');
-    //함수형 미들웨어
-    // consumer.apply(logger).forRoutes(CatsController);
+    // consumer.apply(LoggerMiddleware).forRoutes(AuthController);
   }
 }
+
+/**
+ *  TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('dbConfig.host'),
+        port: configService.get('dbConfig.port'),
+        username: configService.get('dbConfig.username'),
+        password: configService.get('dbConfig.password'),
+        database: configService.get('dbConfig.name'),
+        charset: 'utf8mb4_general_ci',
+        timezone: '+09:00',
+        synchronize: true, // todo: production environ = false
+        logging: ['error'],
+        logger: 'file',
+        maxQueryExecutionTime: 2000,
+        entities: [...entities],
+      }),
+    }),
+ */
