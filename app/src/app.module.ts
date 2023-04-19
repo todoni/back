@@ -4,18 +4,12 @@ import { MiddlewareConsumer } from '@nestjs/common';
 import { logger, LoggerMiddleware } from './middleware/logger.middleware';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './filter/http-exception.filter';
-import { envConfig, envValidation } from './config/typeorm.config';
+import { envConfig } from './config/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './module/auth.module';
 import { AuthController } from './controller/auth.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './module/user.module';
-import UserRepository from './repository/user.repository';
-import FriendRepository from './repository/friend.repository';
-import BlockRepository from './repository/block.repository';
-import GameLogRepository from './repository/game_log.repository';
-import AchievementRepository from './repository/achievement.repository';
-import UserAchievementRepository from './repository/user_achievement.repository';
 import { TestModule } from './module/test.moule';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -29,18 +23,18 @@ import { JwtModule } from '@nestjs/jwt';
       isGlobal: true,
       envFilePath: '.env',
       load: [envConfig],
-      validationSchema: envValidation(),
+      // validationSchema: envValidation(),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get('dbConfig.host'),
-        port: configService.get('dbConfig.port'),
-        username: configService.get('dbConfig.username'),
-        password: configService.get('dbConfig.password'),
-        database: configService.get('dbConfig.name'),
+        host: configService.get<string>('dbConfig.host'),
+        port: configService.get<number>('dbConfig.port'),
+        username: configService.get<string>('dbConfig.name'),
+        password: configService.get<string>('dbConfig.password'),
+        database: configService.get<string>('dbConfig.dbname'),
       }),
     }),
   ],
@@ -52,25 +46,3 @@ export class AppModule implements NestModule {
     // consumer.apply(LoggerMiddleware).forRoutes(AuthController);
   }
 }
-
-/**
- *  TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('dbConfig.host'),
-        port: configService.get('dbConfig.port'),
-        username: configService.get('dbConfig.username'),
-        password: configService.get('dbConfig.password'),
-        database: configService.get('dbConfig.name'),
-        charset: 'utf8mb4_general_ci',
-        timezone: '+09:00',
-        synchronize: true, // todo: production environ = false
-        logging: ['error'],
-        logger: 'file',
-        maxQueryExecutionTime: 2000,
-        entities: [...entities],
-      }),
-    }),
- */
