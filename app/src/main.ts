@@ -8,6 +8,6 @@ async function bootstrap() {
   app.enableCors();
   // app.use(logger);
   app.use(cookieParser(process.env.JWT_SECRET));
-  await app.listen(process.env.PORT);
+  await app.listen(process.env.SERVER_PORT);
 }
 bootstrap();
