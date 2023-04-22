@@ -1,10 +1,3 @@
-import { Achievement } from '@entity/achievement.entity';
-import { Block } from '@entity/block.entity';
-import { Friend } from '@entity/friend.entity';
-import { GameLog } from '@entity/game_log.entity';
-import { User } from '@entity/user.entity';
-import { UserAchievement } from '@entity/user_achievement';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 
 // export const envValidation = () =>
@@ -32,18 +25,6 @@ import * as Joi from 'joi';
 //     // REDIS_HOST: Joi.string().required(),
 //     // REDIS_PORT: Joi.string().required(),
 //   });
-
-// export const typeOrmConfig: TypeOrmModuleOptions = {
-//   type: 'postgres',
-//   host: process.env.DB_HOST,
-//   port: parseInt(process.env.DB_PORT),
-//   username: process.env.DB_USERNAME,
-//   password: parseInt(process.env.DB_PASSWORD).toString(),
-//   database: process.env.DB_DATABASE,
-//   entities: [User, Friend, Block, Achievement, UserAchievement, GameLog],
-//   synchronize: process.env.NODE_ENV !== 'production',
-//   logging: true,
-// };
 
 export const envConfig = () => ({
   serverConfig: {

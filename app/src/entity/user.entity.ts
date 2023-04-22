@@ -1,18 +1,10 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Long,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Achievement } from './achievement.entity';
-import { Block } from './block.entity';
-import { Common } from './common/common.entity';
-import { Friend } from './friend.entity';
-import { GameLog } from './game_log.entity';
-import { UserAchievement } from './user_achievement';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Block } from '@entity/block.entity';
+import { Common } from '@entity/common/common.entity';
+import { Friend } from '@entity/friend.entity';
+import { GameLog } from '@entity/game_log.entity';
+import { UserAchievement } from '@entity/user_achievement';
 
 @Entity('users')
 export class User extends Common {

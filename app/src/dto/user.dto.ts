@@ -1,9 +1,8 @@
-import { Expose } from 'class-transformer';
-import { Block } from 'src/entity/block.entity';
-import { Friend } from 'src/entity/friend.entity';
-import { GameLog } from 'src/entity/game_log.entity';
-import { User } from 'src/entity/user.entity';
-import { UserAchievement } from 'src/entity/user_achievement';
+import { Block } from '@entity/block.entity';
+import { Friend } from '@entity/friend.entity';
+import { GameLog } from '@entity/game_log.entity';
+import { User } from '@entity/user.entity';
+import { UserAchievement } from '@entity/user_achievement';
 
 export class UserDto {
   id: number;

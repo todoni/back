@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { UserService } from '@src/service/user.service';
 import { Strategy } from 'passport-42';
+
+import { UserService } from '@service/user.service';
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(Strategy, 'ft') {

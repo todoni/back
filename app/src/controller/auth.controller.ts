@@ -1,25 +1,18 @@
 import {
   Controller,
   Get,
-  Param,
-  Query,
-  Post,
-  Body,
   UseGuards,
   Req,
-  HttpStatus,
   UseInterceptors,
-  Res,
 } from '@nestjs/common';
 
-import { HttpCode, Redirect } from '@nestjs/common';
-import { JwtAuthGuard } from '@src/guard/jwt.guard';
-import { AuthService } from '@src/service/auth.service';
-import { AuthResponseDto } from 'src/dto/auth.dto';
-import { FtAuthGuard } from 'src/guard/ft.guard';
-import { TokenInterceptor } from '@src/interceptor/token.interceptor';
+import { JwtAuthGuard } from '@guard/jwt.guard';
+import { FtAuthGuard } from '@guard/ft.guard';
+import { AuthService } from '@service/auth.service';
+import { UserService } from '@service/user.service';
+import { AuthResponseDto } from '@dto/auth.dto';
+import { TokenInterceptor } from '@interceptor/token.interceptor';
 import { User } from '@entity/user.entity';
-import { UserService } from '@src/service/user.service';
 
 @Controller('auth')
 export class AuthController {

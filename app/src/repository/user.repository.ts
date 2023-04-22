@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { User } from 'src/entity/user.entity';
-import { Friend } from 'src/entity/friend.entity';
+
+import { User } from '@entity/user.entity';
 import { UserAccessDto } from '@src/dto/user.dto';
 
 @Injectable()

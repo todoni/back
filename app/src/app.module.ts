@@ -1,18 +1,14 @@
-import { Module, NestModule, RequestMethod } from '@nestjs/common';
-import { AppService } from './service/app.service';
-import { MiddlewareConsumer } from '@nestjs/common';
-import { logger, LoggerMiddleware } from './middleware/logger.middleware';
-import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './filter/http-exception.filter';
-import { envConfig } from './config/config';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './module/auth.module';
-import { AuthController } from './controller/auth.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserModule } from './module/user.module';
-import { TestModule } from './module/test.moule';
 import { JwtModule } from '@nestjs/jwt';
-import entities from './util/entity';
+
+import { AppService } from '@service/app.service';
+import { envConfig } from '@config/config';
+import { AuthModule } from '@module/auth.module';
+import { UserModule } from '@module/user.module';
+import { TestModule } from '@module/test.moule';
+import entities from '@util/entity';
 
 @Module({
   imports: [

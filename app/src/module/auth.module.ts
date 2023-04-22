@@ -1,17 +1,16 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { AuthController } from 'src/controller/auth.controller';
-import { FtStrategy } from 'src/strategy/ft.strategy';
-import repositories from 'src/util/repository';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
-import { ConfigService } from '@nestjs/config';
-import { JwtStrategy } from '@src/strategy/jwt.strategy';
-import { UserModule } from './user.module';
-import { AuthService } from '@src/service/auth.service';
-import { TokenInterceptor } from '@src/interceptor/token.interceptor';
-import { Algorithm } from 'node_modules/@types/jsonwebtoken/index';
-import { UserService } from '@src/service/user.service';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { UserModule } from '@module/user.module';
+import { AuthController } from '@controller/auth.controller';
+import { FtStrategy } from '@strategy/ft.strategy';
+import { JwtStrategy } from '@strategy/jwt.strategy';
+import { AuthService } from '@service/auth.service';
+import { UserService } from '@service/user.service';
+import { TokenInterceptor } from '@interceptor/token.interceptor';
+import repositories from '@util/repository';
 
 @Module({
   imports: [
@@ -22,7 +21,7 @@ import { UserService } from '@src/service/user.service';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          algorithm: configService.get<Algorithm>('JWT_ALGORITHM'),
+          algorithm: configService.get('JWT_ALGORITHM'),
           expiresIn: configService.get<string>('JWT_EXPIRED_IN'),
         },
       }),
