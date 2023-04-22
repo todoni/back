@@ -1,0 +1,556 @@
+openapi: 3.0.0
+info:
+  description: '트센 API 명세'
+  version: '1.0'
+  title: 'ft_transcendance'
+  contact:
+    email: 'tmdgks22222@gmail.com'
+  license:
+    name: 'Apache 2.0'
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: '42.300.11.197:3000'
+
+# API 카테고리
+tags:
+  - name: Auth
+    description: 사용자 인증 API
+  - name: User
+    description: 사용자 정보 API
+
+# API 문서
+paths:
+  # 인증 API
+  /v0/auth/login:
+    get:
+      tags:
+        - Auth
+      summary: 로그인
+      description: <h1>42 OAuth를 이용한 로그인<br>42 Login Page로 리다이렉션 될 거임<h1/>
+      responses:
+        301:
+          description: 42 Login page redirection
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /v0/auth/login/callback:
+    get:
+      tags:
+        - Auth
+      summary: 로그인 콜백
+      description: <div>42 OAuth redirect uri<h1/><br><h2>첫 로그인인 경우 회원 가입이 완료 되며 201 status가 응답 되고, 헤더와 쿠키로 토큰이 발급됨.</div><div>응답값 200과 토큰을 잘 확인하고 메인 페이지로 넘어가는 기능을 구현하시면 됨.</div>
+      parameters:
+        - in: query
+          name: code
+          schema:
+            type: string
+            example: 42 OAuth 인가코드 들어갈거임
+          required: true
+      responses:
+        200:
+          $ref: '#/components/responses/Ok-Cookie'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /v0/auth/token:
+    get:
+      tags:
+        - Auth
+      summary: 토큰 유효한지 확인용 (테스트용)
+      description: <div> 클라에서 가지고 있는 토큰이 유효한지 확인용. 개발용이고 제출 전 삭제할거임. 쿠키로 보내야하고, 헤더에 쿠키 데이터 넘기는 방법 확인하면 됨.</div>
+      parameters:
+        - in: cookie
+          name: token
+          description: Token을 입력한다.
+          schema:
+            $ref: '#/components/schemas/Cookie'
+          required: true
+      responses:
+        200:
+          $ref: '#/components/responses/Ok-Cookie'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /v0/auth/test:
+    get:
+      tags:
+        - Auth
+      summary: 테스트계정 name1 계정 토큰 발급용 (테스트용)
+      description: <div> 42api 사용이 힘들 때 테스트계정 용 토큰을 받기 위한 api. 쿠키로 토큰 날라갈거임</div>
+
+      responses:
+        200:
+          $ref: '#/components/responses/Ok-Cookie'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  # /v0/auth/login/access:
+  #   post:
+  #     tags:
+  #       - Auth
+  #     summary: 추가 정보 입력
+  #     description: <h1>최초 로그인 이후 추가 정보 입력 API</h1>
+  #     parameters:
+  #       - in: header
+  #         name: Authorization
+  #         description: 쿠키로 발급받은 `sign` 토큰을 밑 양식에 맞춰 전달한다.
+  #         schema:
+  #           $ref: "#/components/schemas/Cookie"
+  #     requestBody:
+  #       description: 수정하고 싶은 내용만 key-value 형태로 기입
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: "object"
+  #             properties:
+  #               displayName:
+  #                 type: "string"
+  #                 example: "seongsu  // 중복시 400 Bad HttpRequest"
+  #               email:
+  #                 type: "string"
+  #                 example: "test@teest.com  // 이메일 양식 검사함"
+  #               two_factor:
+  #                 type: "boolean"
+  #                 example: "true 또는 false"
+  #               image:
+  #                 type: "string"
+  #                 example: "png, jpeg, jpg 총 3개의 확장자인 이미지 파일만 받아옴. form-data로 전송할 것"
+  #     responses:
+  #       200:
+  #         $ref: "#/components/responses/Ok-Cookie"
+  #       202:
+  #         description: <h2>로그인 성공, 추가로 2단계 인증 필요</h2>
+  #         headers:
+  #           code:
+  #             schema:
+  #               type: "string"
+  #               example: 해싱된 이메일 인증코드가 담겨있음
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: "object"
+  #               properties:
+  #                 status:
+  #                   type: "integer"
+  #                   example: 202
+  #                 message:
+  #                   type: "string"
+  #                   example: "2단계 인증 필요"
+  #       400:
+  #         $ref: "#/components/responses/BadRequest"
+  #       401:
+  #         $ref: "#/components/responses/Unauthorized"
+  #       500:
+  #         $ref: "#/components/responses/ServerError"
+
+  # /v0/auth/logout:
+  #   delete:
+  #     tags:
+  #       - Auth
+  #     summary: 로그아웃
+  #     description: <h1>서버 세션에서 클라이언트 정보 삭제됨</h1>
+  #     parameters:
+  #       - in: header
+  #         name: Authorization
+  #         description: '발급받은 `Access Token` 입력'
+  #         schema:
+  #           $ref: "#/components/schemas/Cookie"
+  #         required: true
+
+  #     responses:
+  #       200:
+  #         $ref: "#/components/responses/Ok"
+  #       400:
+  #         $ref: "#/components/responses/BadRequest"
+  #       401:
+  #         $ref: "#/components/responses/Unauthorized"
+  #       500:
+  #         $ref: "#/components/responses/ServerError"
+
+  # Users
+
+  /user/detail:
+    get:
+      tags:
+        - User
+      summary: 자신의 프로필 전체 정보
+      description: <h1>자신의 프로필 전체 정보</h1>
+      responses:
+        200:
+          description: <h2>성공</h2>
+          content:
+            application/json:
+              schema:
+                type: 'object'
+                properties:
+                  name:
+                    type: string
+                    example: 'seonkim'
+                  nickname:
+                    type: string
+                    example: '굳갱아자아자'
+                  twoFactor:
+                    type: boolean
+                    example: false
+                  twoFactorUid:
+                    type: string
+                    example: '123'
+                  profile:
+                    type: string
+                    example: 'https://ft-transcendence.s3.ap-northeast-2.amazonaws.com/profile/default_avatar.png'
+                  level:
+                    type: number
+                    example: 66.666
+                  winPercent:
+                    type: number
+                    example: 30
+                  userLogs:
+                    type: array
+                    items:
+                      type: string
+                      example: '이건 조금만 있다가 수정하겠음'
+                  achivements:
+                    type: array
+                    items:
+                      type: string
+                      example: '이건 조금만 있다가 수정하겠음'
+                  friends:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          example: '2023-04-16T09:28:12.892Z'
+                        updatedAt:
+                          type: string
+                          example: '2023-04-16T09:28:12.892Z'
+                        deletedAt:
+                          type: string
+                          example: null
+                        id:
+                          type: string
+                          example: '2'
+                        name:
+                          type: string
+                          example: 'name2'
+                        twoFactor:
+                          type: boolean
+                          example: false
+                        profile:
+                          type: string
+                          example: 'https://ft-transcendence.s3.ap-northeast-2.amazonaws.com/profile/default_avatar.png'
+                  blocks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          example: '2023-04-16T09:28:12.892Z'
+                        updatedAt:
+                          type: string
+                          example: '2023-04-16T09:28:12.892Z'
+                        deletedAt:
+                          type: string
+                          example: null
+                        id:
+                          type: string
+                          example: '2'
+                        name:
+                          type: string
+                          example: 'name2'
+                        twoFactor:
+                          type: boolean
+                          example: false
+                        profile:
+                          type: string
+                          example: 'https://ft-transcendence.s3.ap-northeast-2.amazonaws.com/profile/default_avatar.png'
+
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /user/detail/{id}:
+    get:
+      tags:
+        - User
+      summary: id의 유저의 프로필 전체 정보
+      description: <h1>id의 유저의 전체 정보</h1>
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            example: '유저 id'
+          required: true
+      responses:
+        200:
+          description: <h2>성공</h2>
+          content:
+            application/json:
+              schema:
+                type: 'object'
+                properties:
+                  name:
+                    type: string
+                    example: 'seonkim'
+                  nickname:
+                    type: string
+                    example: '굳갱아자아자'
+                  twoFactor:
+                    type: boolean
+                    example: false
+                  twoFactorUid:
+                    type: string
+                    example: '123'
+                  profile:
+                    type: string
+                    example: 'https://ft-transcendence.s3.ap-northeast-2.amazonaws.com/profile/default_avatar.png'
+                  level:
+                    type: number
+                    example: 66.666
+                  winPercent:
+                    type: number
+                    example: 30
+                  userLogs:
+                    type: array
+                    items:
+                      type: string
+                      example: '이건 조금만 있다가 수정하겠음'
+                  achivements:
+                    type: array
+                    items:
+                      type: string
+                      example: '이건 조금만 있다가 수정하겠음'
+                  friends:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          example: '2023-04-16T09:28:12.892Z'
+                        updatedAt:
+                          type: string
+                          example: '2023-04-16T09:28:12.892Z'
+                        deletedAt:
+                          type: string
+                          example: null
+                        id:
+                          type: string
+                          example: '2'
+                        name:
+                          type: string
+                          example: 'name2'
+                        twoFactor:
+                          type: boolean
+                          example: false
+                        profile:
+                          type: string
+                          example: 'https://ft-transcendence.s3.ap-northeast-2.amazonaws.com/profile/default_avatar.png'
+                  blocks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          example: '2023-04-16T09:28:12.892Z'
+                        updatedAt:
+                          type: string
+                          example: '2023-04-16T09:28:12.892Z'
+                        deletedAt:
+                          type: string
+                          example: null
+                        id:
+                          type: string
+                          example: '2'
+                        name:
+                          type: string
+                          example: 'name2'
+                        twoFactor:
+                          type: boolean
+                          example: false
+                        profile:
+                          type: string
+                          example: 'https://ft-transcendence.s3.ap-northeast-2.amazonaws.com/profile/default_avatar.png'
+
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /user/nickname:
+    get:
+      tags:
+        - User
+      summary: nickname 중복확인
+      description: <div> </div>
+      parameters:
+        - in: query
+          name: nickname
+          schema:
+            type: string
+            example: '변경하고픈'
+          required: true
+
+      responses:
+        200:
+          $ref: '#/components/responses/Ok-Cookie'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+# 컴포넌트 정의
+components:
+  # 응답
+  responses:
+    Ok:
+      description: <h2>성공</h2>
+      content:
+        application/json:
+          schema:
+            type: 'object'
+
+    Ok-Cookie:
+      description: <div>성공, 사용자 정보가 담긴 Token이 헤더와 쿠키 반환</div>
+      headers:
+        access_token:
+          schema:
+            $ref: '#/components/schemas/token'
+      content:
+        application/json:
+          schema:
+            type: 'object'
+            properties:
+              status:
+                type: 'integer'
+                example: 200
+              message:
+                type: 'string'
+                example: 'OK'
+
+    BadRequest:
+      description: <h2>잘못된 요청</h2><br>`필수 인자 누락, 타입 오류 등`
+      content:
+        application/json:
+          schema:
+            type: 'object'
+            properties:
+              code:
+                type: 'integer'
+                format: 'int64'
+                example: 400
+              message:
+                type: 'string'
+                example: 'Bad HttpRequest'
+
+    Unauthorized:
+      description: <h2>사용자 인증 실패</h2><br>`존재하지 않는 사용자, JWT 만료, 비정상 토큰`
+      content:
+        application/json:
+          schema:
+            type: 'object'
+            properties:
+              code:
+                type: 'integer'
+                format: 'int64'
+                example: 401
+              message:
+                type: 'string'
+                example: 'UnAuthorized'
+
+    Forbidden:
+      description: <h2>권한 없음</h2><br>`권한없는 API 요청`
+      content:
+        application/json:
+          schema:
+            type: 'object'
+            properties:
+              code:
+                type: 'integer'
+                format: 'int64'
+                example: 403
+              message:
+                type: 'string'
+                example: 'Forbidden'
+
+    NotFound:
+      description: <h2>리소스 없음</h2><br>`존재하지 않는 API를 요청하였거나 존재하지 않는 데이터를 요청`
+      content:
+        application/json:
+          schema:
+            type: 'object'
+            properties:
+              code:
+                type: 'integer'
+                format: 'int64'
+                example: 404
+              message:
+                type: 'string'
+                example: 'Not Found'
+
+    ServerError:
+      description: <h2>서버 오류</h2><br>`서버 연결상태 불량, 특정 코드 오류 등`
+      content:
+        application/json:
+          schema:
+            type: 'object'
+            properties:
+              code:
+                type: 'integer'
+                example: 500
+              message:
+                type: 'string'
+                example: 'Internal Server Error'
+
+  # 스키마
+  schemas:
+    # 유틸 스키마
+    encrypted-name:
+      type: 'string'
+      example: '서버 session의 client식별자인 암호화 된 사용자 이름'
+
+    sign:
+      type: 'string'
+      example: '추가 정보 입력에 필요한 Token'
+
+    token:
+      type: 'string'
+      example: 'API 통신에 필요한 Access Token'
+
+    Cookie:
+      type: 'string'
+      example: 'Bearer "이곳에 Token 입력"'
+
+externalDocs:
+  description: 'Find out more about Swagger'
+  url: 'http://swagger.io'
