@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query, UseGuards, Req } from '@nestjs/common';
 
 import { JwtAuthGuard } from '@src/guard/jwt.guard';
-import { UserDetailDto } from '@dto/user.dto';
+import { UserDetailDto } from '@dto/user/user.dto';
 import { UserService } from '@service/user.service';
 
 @Controller('user')

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { UserAccessDto, UserDetailDto, UserDto } from '@dto/user.dto';
+import { UserAccessDto, UserDetailDto, UserDto } from '@dto/user/user.dto';
 import { User } from '@entity/user.entity';
 import BlockRepository from '@repository/block.repository';
 import FriendRepository from '@repository/friend.repository';
