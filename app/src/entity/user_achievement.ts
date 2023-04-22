@@ -1,16 +1,8 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Achievement } from './achievement.entity';
-import { Common } from './common/common.entity';
-import { User } from './user.entity';
+import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+
+import { Achievement } from '@entity/achievement.entity';
+import { Common } from '@entity/common/common.entity';
+import { User } from '@entity/user.entity';
 
 @Entity('user_achievements')
 export class UserAchievement extends Common {

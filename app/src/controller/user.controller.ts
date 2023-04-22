@@ -1,9 +1,8 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, Req } from '@nestjs/common';
+
 import { JwtAuthGuard } from '@src/guard/jwt.guard';
-import { UserDetailDto } from '@dto/user/user.dto';
-import { User } from 'src/entity/user.entity';
-import { UserService } from 'src/service/user.service';
-import { Req } from '@nestjs/common';
+import { UserDetailDto } from '@dto/user.dto';
+import { UserService } from '@service/user.service';
 
 @Controller('user')
 export class UserController {
@@ -18,9 +17,6 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getMyDetail(@Req() req): Promise<object> {
     const user: UserDetailDto = await this.userService.getUserDetail(req.user);
-    if (user == null) {
-      return { status: 400, message: 'shit' };
-    }
     return user;
   }
 
@@ -28,10 +24,6 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getUserDetailById(@Param('id') id: number): Promise<object> {
     const user: UserDetailDto = await this.userService.getUserDetailById(id);
-    if (user == null) {
-      return { status: 400, message: 'shit' };
-    }
-    console.log(user);
     return user;
   }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { User } from 'src/entity/user.entity';
-import { UserAchievement } from 'src/entity/user_achievement';
+
+import { UserAchievement } from '@entity/user_achievement';
 
 @Injectable()
 export default class UserAchievementRepository extends Repository<UserAchievement> {
@@ -9,8 +9,8 @@ export default class UserAchievementRepository extends Repository<UserAchievemen
     super(UserAchievement, dataSource.createEntityManager());
   }
 
-  findUserAchievement(userId: number): Promise<UserAchievement[] | null> {
-    const query = this.createQueryBuilder('user_achievements')
+  async findUserAchievement(userId: number): Promise<UserAchievement[]> {
+    const query = await this.createQueryBuilder('user_achievements')
       .where('user_achievements.user_id = :userId', { userId: userId })
       .getMany();
     return query;

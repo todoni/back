@@ -5,7 +5,7 @@ export class Common {
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  uodatedAt: Date;
+  updatedAt: Date;
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date;

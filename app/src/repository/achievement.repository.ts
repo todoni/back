@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { User } from 'src/entity/user.entity';
-import { Achievement } from 'src/entity/achievement.entity';
+
+import { Achievement } from '@entity/achievement.entity';
 
 @Injectable()
 export default class AchievementRepository extends Repository<Achievement> {

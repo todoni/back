@@ -21,6 +21,7 @@
       "@config/*": ["./src/config/*"],
       "@controller/*": ["./src/controller/*"],
       "@dto/*": ["./src/dto/*"],
+      "@service/*": ["./src/service/*"],
       "@entity/*": ["./src/entity/*"],
       "@filter/*": ["./src/filter/*"],
       "@guard/*": ["./src/guard/*"],
@@ -29,9 +30,9 @@
       "@module/*": ["./src/module/*"],
       "@pipe/*": ["./src/pipe/*"],
       "@repository/*": ["./src/repository/*"],
-      "@service/*": ["src/strategy/service/*"],
       "@strategy/*": ["./src/strategy/*"],
       "@gateway/*": ["./src/gateway/*"],
+      "@util/*": ["./src/util/*"],
       "@src/*": ["./src/*"]
     }
   }

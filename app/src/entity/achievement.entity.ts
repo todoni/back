@@ -1,13 +1,6 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Common } from './common/common.entity';
-import { UserAchievement } from './user_achievement';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Common } from '@entity/common/common.entity';
 
 @Entity('achievements')
 export class Achievement extends Common {

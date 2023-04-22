@@ -1,12 +1,16 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Achievement } from 'src/entity/achievement.entity';
-import { User } from 'src/entity/user.entity';
-import UserRepository from 'src/repository/user.repository';
-import FriendRepository from 'src/repository/friend.repository';
-import BlockRepository from 'src/repository/block.repository';
-import GameLogRepository from 'src/repository/game_log.repository';
-import UserAchievementRepository from 'src/repository/user_achievement.repository';
-import { UserAccessDto, UserDetailDto, UserDto } from '@dto/user/user.dto';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+
+import { UserAccessDto, UserDetailDto, UserDto } from '@dto/user.dto';
+import { User } from '@entity/user.entity';
+import BlockRepository from '@repository/block.repository';
+import FriendRepository from '@repository/friend.repository';
+import GameLogRepository from '@repository/game_log.repository';
+import UserRepository from '@repository/user.repository';
+import UserAchievementRepository from '@repository/user_achievement.repository';
 
 @Injectable()
 export class UserService {
@@ -29,11 +33,21 @@ export class UserService {
 
   async findByUserId(userId: number): Promise<User> {
     const result = await this.userRepository.findUser(userId);
+    if (result == null) {
+      throw new NotFoundException();
+    }
     return result;
   }
 
-  async findUserByUsername(username: string): Promise<User | null> {
-    return await this.userRepository.findUserByName(username);
+  async findUserByUsername(
+    username: string,
+    isTest: boolean = true,
+  ): Promise<User | null> {
+    const result = await this.userRepository.findUserByName(username);
+    if (isTest == false && result == null) {
+      throw new NotFoundException();
+    }
+    return result;
   }
 
   async createUser(userDto: UserDto) {
@@ -42,8 +56,8 @@ export class UserService {
     user.id = userDto.id;
     user.name = userDto.name;
     user.nickname = userDto.nickname;
-    user.twoFactor = userDto.twFactor;
-    user.twoFactorUid = userDto.twFactorUid;
+    user.twoFactor = userDto.twoFactor;
+    user.twoFactorUid = userDto.twoFactorUid;
     user.profile = userDto.profile;
 
     await this.userRepository.save(userDto);
@@ -68,6 +82,10 @@ export class UserService {
       userAchievementList,
     );
 
+    if (user == null) {
+      throw new NotFoundException();
+    }
+
     return result;
   }
 
@@ -79,7 +97,7 @@ export class UserService {
     const userAchievementList =
       await this.userAchievementRepository.findUserAchievement(userId);
 
-    const user = userList.find((e) => e.id == userId);
+    const user = userList.find((e) => e.id === userId);
 
     const result: UserDetailDto = UserDetailDto.fromData(
       user,
@@ -89,6 +107,10 @@ export class UserService {
       gameLogList,
       userAchievementList,
     );
+
+    if (user == null) {
+      throw new NotFoundException();
+    }
 
     return result;
   }

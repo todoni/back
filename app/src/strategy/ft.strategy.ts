@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { UserService } from '@src/service/user.service';
 import { Strategy } from 'passport-42';
+
+import { UserService } from '@service/user.service';
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
@@ -17,7 +18,11 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
     });
   }
 
-  async validate(profile: any): Promise<any> {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+  ): Promise<any> {
     const user = await this.userService.findUserByUsername(profile['username']);
 
     if (!user) {
@@ -25,8 +30,8 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
         id: profile._json['id'],
         name: profile._json['login'],
         nickname: profile._json['login'],
-        twFactor: false,
-        twFactorUid: '',
+        twoFactor: false,
+        twoFactorUid: '',
         profile: profile._json['image']['link'],
         firstAccess: true,
       });

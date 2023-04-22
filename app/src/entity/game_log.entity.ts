@@ -1,16 +1,13 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
-import { Common } from './common/common.entity';
-import { User } from './user.entity';
+
+import { Common } from '@entity/common/common.entity';
+import { User } from '@entity/user.entity';
 
 @Entity('game_logs')
 export class GameLog extends Common {

@@ -1,24 +1,15 @@
-import { Module, NestModule, RequestMethod } from '@nestjs/common';
-import { AppService } from './service/app.service';
-import { MiddlewareConsumer } from '@nestjs/common';
-import { logger, LoggerMiddleware } from './middleware/logger.middleware';
-import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './filter/http-exception.filter';
-import { typeOrmConfig } from './config/typeorm.config';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './module/auth.module';
-import { AuthController } from './controller/auth.controller';
-import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './module/user.module';
-import UserRepository from './repository/user.repository';
-import FriendRepository from './repository/friend.repository';
-import BlockRepository from './repository/block.repository';
-import GameLogRepository from './repository/game_log.repository';
-import AchievementRepository from './repository/achievement.repository';
-import UserAchievementRepository from './repository/user_achievement.repository';
-import { TestModule } from './module/test.moule';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import GatewayModule from '@module/gateway.module';
+
+import { AppService } from '@service/app.service';
+import { envConfig } from '@config/config';
+import { AuthModule } from '@module/auth.module';
+import { UserModule } from '@module/user.module';
+import { TestModule } from '@module/test.moule';
+import entities from '@util/entity';
 
 @Module({
   imports: [
@@ -27,22 +18,31 @@ import GatewayModule from '@module/gateway.module';
     UserModule,
     TestModule,
     GatewayModule,
-    TypeOrmModule.forRoot(typeOrmConfig),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [envConfig],
+      // validationSchema: envValidation(),
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('dbConfig.host'),
+        port: configService.get<number>('dbConfig.port'),
+        username: configService.get<string>('dbConfig.name'),
+        password: configService.get<string>('dbConfig.password'),
+        database: configService.get<string>('dbConfig.dbname'),
+        entities: [...entities],
+      }),
     }),
   ],
   providers: [AppService],
-  // providers: [AppService, {provide: APP_FILTER , useClass: HttpExceptionFilter}],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     //미들웨어
-    consumer.apply(LoggerMiddleware).forRoutes(AuthController);
-    // .exclude({ path: 'cats', method: RequestMethod.GET }, { path: 'cats', method: RequestMethod.POST }, 'cats/(.*)')
-    // .forRoutes('cats/test');
-    //함수형 미들웨어
-    // consumer.apply(logger).forRoutes(CatsController);
+    // consumer.apply(LoggerMiddleware).forRoutes(AuthController);
   }
 }

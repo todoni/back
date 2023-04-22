@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { User } from 'src/entity/user.entity';
-import { Block } from 'src/entity/block.entity';
+import { Injectable } from '@nestjs/common';
+
+import { Block } from '@entity/block.entity';
 
 @Injectable()
 export default class BlockRepository extends Repository<Block> {
@@ -9,10 +9,10 @@ export default class BlockRepository extends Repository<Block> {
     super(Block, dataSource.createEntityManager());
   }
 
-  findBlocks(userId : number) : Promise<Block[] | null>{
-    const query = this.createQueryBuilder('blocks')
-      .where('blocks.source_id = :userId', {userId : userId})
-      .orWhere('blocks.target_id = :userId', {userId : userId})
+  async findBlocks(userId: number): Promise<Block[]> {
+    const query = await this.createQueryBuilder('blocks')
+      .where('blocks.source_id = :userId', { userId: userId })
+      .orWhere('blocks.target_id = :userId', { userId: userId })
       .getMany();
     return query;
   }
