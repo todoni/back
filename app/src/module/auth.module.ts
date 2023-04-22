@@ -11,6 +11,7 @@ import { UserModule } from './user.module';
 import { AuthService } from '@src/service/auth.service';
 import { TokenInterceptor } from '@src/interceptor/token.interceptor';
 import { Algorithm } from 'node_modules/@types/jsonwebtoken/index';
+import { UserService } from '@src/service/user.service';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Algorithm } from 'node_modules/@types/jsonwebtoken/index';
   providers: [
     TokenInterceptor,
     AuthService,
+    UserService,
     JwtStrategy,
     ConfigService,
     FtStrategy,

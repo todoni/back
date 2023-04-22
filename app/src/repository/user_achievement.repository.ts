@@ -15,5 +15,4 @@ export default class UserAchievementRepository extends Repository<UserAchievemen
       .getMany();
     return query;
   }
-  c;
 }

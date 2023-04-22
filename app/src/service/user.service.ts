@@ -1,6 +1,10 @@
 import { UserAccessDto, UserDetailDto, UserDto } from '@dto/user.dto';
 import { User } from '@entity/user.entity';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import BlockRepository from '@repository/block.repository';
 import FriendRepository from '@repository/friend.repository';
 import GameLogRepository from '@repository/game_log.repository';
@@ -26,13 +30,21 @@ export class UserService {
     });
   }
 
-  async findByUserId(userId: number): Promise<User | null> {
+  async findByUserId(userId: number): Promise<User> {
     const result = await this.userRepository.findUser(userId);
+    if (!result) throw new NotFoundException();
     return result;
   }
 
-  async findUserByUsername(username: string): Promise<User | null> {
-    return await this.userRepository.findUserByName(username);
+  async findUserByUsername(
+    username: string,
+    isTest: boolean = true,
+  ): Promise<User | null> {
+    const result = await this.userRepository.findUserByName(username);
+    if (isTest == false && result == null) {
+      throw new NotFoundException();
+    }
+    return result;
   }
 
   async createUser(userDto: UserDto) {

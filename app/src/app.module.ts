@@ -12,6 +12,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './module/user.module';
 import { TestModule } from './module/test.moule';
 import { JwtModule } from '@nestjs/jwt';
+import entities from './util/entity';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { JwtModule } from '@nestjs/jwt';
         username: configService.get<string>('dbConfig.name'),
         password: configService.get<string>('dbConfig.password'),
         database: configService.get<string>('dbConfig.dbname'),
+        entities: [...entities],
       }),
     }),
   ],
