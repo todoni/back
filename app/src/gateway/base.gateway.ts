@@ -21,7 +21,6 @@ export const GatewayInjector = (namespace: string): ClassDecorator => {
     namespace,
   };
 
-  console.log(port, typeof port);
   return WebSocketGateway(port, options);
 };
 
@@ -42,6 +41,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
      *   - Client 세팅 로직 추가
      *   - 현존하는 방, 유저 등 데이터 반환 로직 추가
      */
+    console.log(client.id);
     client.join(client.id);
     this.changeState(client, UserSocketState.ONLINE);
   }

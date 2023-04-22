@@ -7,7 +7,7 @@ import {
 import BaseGateway, { GatewayInjector } from '@gateway/base.gateway';
 import ClientSocket from '@dto/client.socket';
 
-@GatewayInjector('chat')
+@GatewayInjector('game')
 class GameGateway extends BaseGateway {
   /**
    * == 게임방 ==

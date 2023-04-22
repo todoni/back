@@ -37,7 +37,13 @@ class ChatGateway extends BaseGateway {
   createChat(
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('chat') createChatDto: CreateChatDto,
-  ) {}
+  ) {
+    // result = business logic
+    const result = 'channel1';
+    client.join(result);
+    console.log(result);
+    this.server.except(result).emit('broadcast:chat:createChat', result);
+  }
 
   @SubscribeMessage('updateChat')
   updateChat(
@@ -54,7 +60,10 @@ class ChatGateway extends BaseGateway {
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('chatId', ParseIntPipe) chatId: number,
     @MessageBody('password') password?: string,
-  ) {}
+  ) {
+    const result = 'user1';
+    this.server.to('channel1').emit('group:chat:joinChat', result);
+  }
 
   @SubscribeMessage('leaveChat')
   leaveChat(@ConnectedSocket() client: ClientSocket) {}
