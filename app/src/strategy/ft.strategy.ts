@@ -30,8 +30,8 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
         id: profile._json['id'],
         name: profile._json['login'],
         nickname: profile._json['login'],
-        twFactor: false,
-        twFactorUid: '',
+        twoFactor: false,
+        twoFactorUid: '',
         profile: profile._json['image']['link'],
         firstAccess: true,
       });

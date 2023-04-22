@@ -8,8 +8,8 @@ export class UserDto {
   id: number;
   name: string;
   nickname: string;
-  twFactor: boolean;
-  twFactorUid: string;
+  twoFactor: boolean;
+  twoFactorUid: string;
   profile: string;
   firstAccess: boolean;
 }
@@ -17,8 +17,8 @@ export class UserDto {
 export class UserDetailDto {
   name: string;
   nickname: string;
-  twFactor: boolean;
-  twFactorUid: string;
+  twoFactor: boolean;
+  twoFactorUid: string;
   profile: string;
   level: number;
 
@@ -39,8 +39,8 @@ export class UserDetailDto {
     const temp = new UserDetailDto();
     temp.name = user.name;
     temp.nickname = user.nickname;
-    temp.twFactor = user.twoFactor;
-    temp.twFactorUid = user.twoFactorUid;
+    temp.twoFactor = user.twoFactor;
+    temp.twoFactorUid = user.twoFactorUid;
     temp.profile = user.profile;
     temp.level = gameLogList.length * 10;
     //////////////////////////////////////////////////////////
@@ -70,8 +70,8 @@ export class UserDetailDto {
 export class UserLog {
   name: string;
   nickname: string;
-  twFactor: boolean;
-  twFactorUid: string;
+  twoFactor: boolean;
+  twoFactorUid: string;
   profile: string;
 }
 
