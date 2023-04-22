@@ -57,6 +57,7 @@ export class AuthController {
   async testToken(@Req() req): Promise<any> {
     const user: User = await this.userService.findUserByUsername('name1', true);
 
+    ///개발용이라 내부에서 throw 안햇습다
     if (user == null) {
       return {
         status: 404,

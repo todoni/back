@@ -32,7 +32,9 @@ export class UserService {
 
   async findByUserId(userId: number): Promise<User> {
     const result = await this.userRepository.findUser(userId);
-    if (!result) throw new NotFoundException();
+    if (result == null) {
+      throw new NotFoundException();
+    }
     return result;
   }
 
@@ -79,6 +81,10 @@ export class UserService {
       userAchievementList,
     );
 
+    if (user == null) {
+      throw new NotFoundException();
+    }
+
     return result;
   }
 
@@ -100,6 +106,10 @@ export class UserService {
       gameLogList,
       userAchievementList,
     );
+
+    if (user == null) {
+      throw new NotFoundException();
+    }
 
     return result;
   }

@@ -18,9 +18,6 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getMyDetail(@Req() req): Promise<object> {
     const user: UserDetailDto = await this.userService.getUserDetail(req.user);
-    if (user == null) {
-      return { status: 400, message: 'shit' };
-    }
     return user;
   }
 
@@ -28,10 +25,6 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getUserDetailById(@Param('id') id: number): Promise<object> {
     const user: UserDetailDto = await this.userService.getUserDetailById(id);
-    if (user == null) {
-      return { status: 400, message: 'shit' };
-    }
-    console.log(user);
     return user;
   }
 
