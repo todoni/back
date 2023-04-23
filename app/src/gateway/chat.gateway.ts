@@ -23,6 +23,7 @@ class ChatGateway extends BaseGateway {
    * S - 초대
    * S - 유저 차단
    * S - DM 전송
+   * 
    */
 
   constructor() {
