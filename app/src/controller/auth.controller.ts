@@ -2,9 +2,10 @@ import {
   Controller,
   Get,
   UseGuards,
-  Req,
+  Req, Res,
   UseInterceptors,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { JwtAuthGuard } from '@guard/jwt.guard';
 import { FtAuthGuard } from '@guard/ft.guard';
@@ -13,12 +14,14 @@ import { UserService } from '@service/user.service';
 import { AuthResponseDto } from '@dto/auth.dto';
 import { TokenInterceptor } from '@interceptor/token.interceptor';
 import { User } from '@entity/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Get('login')
@@ -34,6 +37,23 @@ export class AuthController {
   async callback(@Req() req): Promise<AuthResponseDto> {
     console.log('Enter callback controller!');
     return { status: 200, message: 'OK' };
+  }
+
+  @Get('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req, @Res() res : Response): Promise<any> {
+    console.log('Enter logout controller!');
+    const user = req.user;
+    const tokenResult = await this.authService.getJwtToken(
+      user.name,
+      user.id,
+    );
+    res.cookie('token', tokenResult.access_token, {
+      httpOnly: true,
+      maxAge: 1000,
+      domain: this.configService.get("serverConfig.url"),
+    });
+    return res.status(200).json({message: 'ok'}).send();
   }
 
   /// 클라이언트의 쿠키가 올바른지 확인용 (개발용)

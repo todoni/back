@@ -29,6 +29,7 @@ import * as Joi from 'joi';
 export const envConfig = () => ({
   serverConfig: {
     port: parseInt(process.env.SERVER_PORT, 10) || 3000,
+    uirl:process.env.SERVER_URL,
   },
   ftConfig: {
     uid: process.env.CLIENT_ID_42,

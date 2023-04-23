@@ -38,7 +38,7 @@ export class TokenInterceptor implements NestInterceptor {
         res.cookie('token', tokenResult.access_token, {
           httpOnly: true,
           maxAge: 432000000000,
-          domain: '43.200.11.197',
+          domain: this.configService.get("serverConfig.url"),
         });
         res.header('token', tokenResult.access_token);
 
