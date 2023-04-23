@@ -50,11 +50,13 @@ export class AuthController {
     );
     res.cookie('token', tokenResult.access_token, {
       httpOnly: true,
-      maxAge: 1000,
+      maxAge: 0,
       domain: this.configService.get("serverConfig.url"),
     });
-    return res.status(200).json({message: 'ok'}).send();
+    return res.status(200).json({status: 200, message: 'ok'}).send();
   }
+
+
 
   /// 클라이언트의 쿠키가 올바른지 확인용 (개발용)
   @Get('/token')
