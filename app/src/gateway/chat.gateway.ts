@@ -42,7 +42,8 @@ class ChatGateway extends BaseGateway {
     const result = 'channel1';
     client.join(result);
     console.log(result);
-    this.server.except(result).emit('broadcast:chat:createChat', result);
+    console.log(createChatDto)
+    this.server.except(result).emit('broadcast:chat:createChat', createChatDto);
   }
 
   @SubscribeMessage('updateChat')
