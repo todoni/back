@@ -24,10 +24,10 @@ export default class UserRepository extends Repository<User> {
     return query;
   }
 
-  async updateFirstAccess(userId: number, userAccessDto: UserAccessDto) {
+  async updateFirstAccess(user:User) {
     await this.createQueryBuilder('users')
-      .update(userAccessDto)
-      .where('users.id = :id', { id: userId })
+      .update(user)
+      .where('users.id = :id', { id: user.id })
       .execute();
   }
 }

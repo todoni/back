@@ -21,6 +21,7 @@ export class UserDetailDto {
   twoFactorUid: string;
   profile: string;
   level: number;
+  firstAccess: boolean;
 
   friends: User[];
   blocks: User[];
@@ -42,6 +43,7 @@ export class UserDetailDto {
     temp.twoFactor = user.twoFactor;
     temp.twoFactorUid = user.twoFactorUid;
     temp.profile = user.profile;
+    temp.firstAccess = user.firstAccess;
     temp.level = gameLogList.length * 10;
     //////////////////////////////////////////////////////////
     const friendSourceList = friendList.filter(
