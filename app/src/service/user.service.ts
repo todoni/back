@@ -121,12 +121,12 @@ export class UserService {
     return false;
   }
 
-  async firstAccess(user: User, userAccessDto: UserAccessDto) {
+  async firstAccess(user: User) {
     if (!user.firstAccess) throw new ForbiddenException();
 
-    userAccessDto.firstAccess = false;
+    user.firstAccess = false;
 
-    await this.userRepository.updateFirstAccess(user.id, userAccessDto);
+    await this.userRepository.updateFirstAccess(user);
   }
 
   async deleteUserByEntity(user: User) {

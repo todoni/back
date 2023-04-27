@@ -35,6 +35,7 @@ import entities from '@util/entity';
         password: configService.get<string>('dbConfig.password'),
         database: configService.get<string>('dbConfig.dbname'),
         entities: [...entities],
+        synchronize: true,
       }),
     }),
   ],
