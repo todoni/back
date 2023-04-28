@@ -1,20 +1,17 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 import ChatType from '@dto/chat/chat.type';
 
 class CreateChatDto {
   @IsNotEmpty()
-  @IsNumber()
-  userId: number;
+  @IsString()
+  name: string;
 
   @IsNotEmpty()
   @IsString()
-  chatName: string;
+  type: ChatType;
 
-  @IsNotEmpty()
-  @IsString()
-  chatState: ChatType;
-
+  @IsOptional()
   @IsString()
   password?: string;
 }

@@ -6,9 +6,12 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 
-import ClientSocket from '@dto/client.socket';
+import ClientSocket, { IC_TYPE } from '@dto/socket/client.socket';
 import UserSocketState from '@dto/user/user.socket.state';
+import { SocketGlobalFilter } from '@exception/socket.global.filter';
+import SocketSession from '@session/socket.session';
 
 export const GatewayInjector = (namespace: string): ClassDecorator => {
   const port = 4000;
@@ -30,9 +33,12 @@ export const GatewayInjector = (namespace: string): ClassDecorator => {
  *   - 소켓 Event 별 권한 예외처리 Interceptor 추가
  */
 
+@UseFilters(SocketGlobalFilter)
+@UsePipes(new ValidationPipe())
 class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  protected server: Server;
+  protected socketSession = new SocketSession();
 
   handleConnection(client: ClientSocket) {
     /**
@@ -41,12 +47,15 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
      *   - Client 세팅 로직 추가
      *   - 현존하는 방, 유저 등 데이터 반환 로직 추가
      */
-    console.log(client.id);
-    client.join(client.id);
+    const userId = 1;
+    client.set(IC_TYPE.USER, userId);
+    this.socketSession.set(userId, client);
     this.changeState(client, UserSocketState.ONLINE);
   }
 
   handleDisconnect(client: ClientSocket) {
+    client.clear(IC_TYPE.USER);
+    this.socketSession.delete(client.user.id);
     this.changeState(client, UserSocketState.OFFLINE);
   }
 

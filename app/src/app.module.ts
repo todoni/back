@@ -2,14 +2,16 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import GatewayModule from '@module/gateway.module';
 
+import entities from '@util/entity';
 import { AppService } from '@service/app.service';
 import { envConfig } from '@config/config';
 import { AuthModule } from '@module/auth.module';
 import { UserModule } from '@module/user.module';
 import { TestModule } from '@module/test.moule';
-import entities from '@util/entity';
+import GatewayModule from '@module/gateway.module';
+import ServiceModule from '@module/service.module';
+import SessionModule from '@module/session.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import entities from '@util/entity';
     UserModule,
     TestModule,
     GatewayModule,
+    ServiceModule,
+    SessionModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

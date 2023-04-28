@@ -32,6 +32,8 @@
       "@repository/*": ["./src/repository/*"],
       "@strategy/*": ["./src/strategy/*"],
       "@gateway/*": ["./src/gateway/*"],
+      "@session/*": ["./src/session/*"],
+      "@exception/*": ["./src/exception/*"],
       "@util/*": ["./src/util/*"],
       "@src/*": ["./src/*"]
     }
