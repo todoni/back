@@ -5,7 +5,7 @@ import {
 } from '@nestjs/websockets';
 
 import BaseGateway, { GatewayInjector } from '@gateway/base.gateway';
-import ClientSocket from '@dto/client.socket';
+import ClientSocket from '@dto/socket/client.socket';
 
 @GatewayInjector('game')
 class GameGateway extends BaseGateway {

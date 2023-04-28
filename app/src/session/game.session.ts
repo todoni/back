@@ -5,6 +5,10 @@ import BaseSession from '@session/base.session';
 interface GameSessionDto {}
 
 @Injectable()
-class GameSession extends BaseSession<GameSessionDto> {}
+class GameSession extends BaseSession<GameSessionDto> {
+  constructor() {
+    super();
+  }
+}
 
 export default GameSession;
