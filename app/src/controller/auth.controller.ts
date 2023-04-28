@@ -36,7 +36,7 @@ export class AuthController {
   @UseInterceptors(TokenInterceptor)
   async callback(@Req() req): Promise<AuthResponseDto> {
     console.log('Enter callback controller!');
-    return { status: 200, message: 'OK' };
+    return { status: 302, message: 'OK' };
   }
 
   @Get('logout')

@@ -42,7 +42,21 @@ export class TokenInterceptor implements NestInterceptor {
         });
         res.header('token', tokenResult.access_token);
 
-        return result;
+        // return result;
+        if (result.status === 302) {
+          res.cookie('token', tokenResult.access_token, {
+            httpOnly: true,
+            maxAge: 432000000000,
+            domain: this.configService.get("serverConfig.url"),
+            sameSite: 'none', // todo: 배포 시 strict로 변경
+            secure: true,
+            path: '/'
+          }).redirect("http://10.11.3.2:3000/lobby");
+        } else {
+          return {
+            status: result.status,
+          };
+        }
       }),
     );
   }
