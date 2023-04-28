@@ -16,7 +16,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request) => request.cookies.token,
+        (request) => {
+          console.log(request.cookies)
+          return request.cookies.token
+        },
       ]),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
