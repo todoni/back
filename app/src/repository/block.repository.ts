@@ -16,4 +16,15 @@ export default class BlockRepository extends Repository<Block> {
       .getMany();
     return query;
   }
+
+  async blockUser(sourceId: number, targetId: number) {
+    await this.createQueryBuilder('blocks')
+      .insert()
+      .into(Block)
+      .values({
+        sourceId: sourceId,
+        targetId: targetId,
+      })
+      .execute();
+  }
 }

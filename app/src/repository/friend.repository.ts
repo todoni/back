@@ -15,4 +15,29 @@ export default class FriendRepository extends Repository<Friend> {
       .getMany();
     return query;
   }
+
+  async followUser(sourceId: number, targetId: number) {
+    await this.createQueryBuilder('friends')
+      .insert()
+      .into(Friend)
+      .values({
+        sourceId: sourceId,
+        targetId: targetId,
+      })
+      .execute();
+  }
+
+  async unFollowUser(sourceId: number, targetId: number) {
+    await this.createQueryBuilder('friends')
+      .delete()
+      .from(Friend)
+      .where(
+        'friends.source_id = :sourceId and friends.target_id = :targetId',
+        {
+          sourceId: sourceId,
+          targetId: targetId,
+        },
+      )
+      .execute();
+  }
 }

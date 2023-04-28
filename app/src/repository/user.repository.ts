@@ -24,10 +24,26 @@ export default class UserRepository extends Repository<User> {
     return query;
   }
 
-  async updateFirstAccess(user:User) {
+  async updateFirstAccess(user: User) {
     await this.createQueryBuilder('users')
       .update(user)
       .where('users.id = :id', { id: user.id })
+      .execute();
+  }
+
+  async updateDisplayName(userId: number, name: string) {
+    await this.createQueryBuilder('users')
+      .update()
+      .set({ nickname: name })
+      .where('users.id = :id', { id: userId })
+      .execute();
+  }
+
+  async updateImageUrl(userId: number, imageUrl: string) {
+    await this.createQueryBuilder('users')
+      .update()
+      .set({ profile: imageUrl })
+      .where('users.id = :userId', { userId: userId })
       .execute();
   }
 }

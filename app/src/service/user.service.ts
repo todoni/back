@@ -132,4 +132,24 @@ export class UserService {
   async deleteUserByEntity(user: User) {
     await this.userRepository.delete(user);
   }
+
+  async updateDisplayName(userId: number, name: string) {
+    await this.userRepository.updateDisplayName(userId, name);
+  }
+
+  async followUser(sourceId: number, targetId: number) {
+    await this.friendRepository.followUser(sourceId, targetId);
+  }
+
+  async unFollowUser(sourceId: number, targetId: number) {
+    await this.friendRepository.unFollowUser(sourceId, targetId);
+  }
+
+  async blockUser(sourceId: number, targetId: number) {
+    await this.blockRepository.blockUser(sourceId, targetId);
+  }
+
+  async updateImage(userId: number, imageUrl: string) {
+    await this.userRepository.updateImageUrl(userId, imageUrl);
+  }
 }
