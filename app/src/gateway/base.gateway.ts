@@ -59,8 +59,12 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.changeState(client, UserSocketState.OFFLINE);
   }
 
-  changeState(client: ClientSocket, status: UserSocketState) {
-    this.server.except(client.id).emit('broadcast:user:changeStatus', status);
+  changeState(client: ClientSocket, state: UserSocketState) {
+    client.state = state;
+    this.server.emit('broadcast:user:changeStatus', {
+      userId: client.user.id,
+      state: client.state,
+    });
   }
 }
 

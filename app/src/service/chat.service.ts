@@ -1,7 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import ChatSession from '@session/chat.session';
 import CreateChatDto from '@dto/chat/create.chat.dto';
@@ -35,7 +32,7 @@ class ChatService {
     chatSession.public.adminId = userId;
     chatSession.public.name = createChatDto.name;
     chatSession.public.type = createChatDto.type;
-    chatSession.private.room = `chat-${chatId}`;
+    chatSession.private.room = `room:chat:${chatId}`;
     chatSession.private.users.push(userId);
 
     if (createChatDto.type === ChatType.PROTECTED) {

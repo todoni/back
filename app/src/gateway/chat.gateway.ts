@@ -212,7 +212,7 @@ class ChatGateway extends BaseGateway {
   ) {
     this.chatService.sendMessage(client.chat.id, userId);
     this.server
-      .to([client.user.room, `user-${userId}`])
+      .to([client.user.room, `room:user:${userId}`])
       .emit('single:chat:sendMessage', {
         sourceId: client.user.id,
         message: message,
@@ -230,7 +230,7 @@ class ChatGateway extends BaseGateway {
     @MessageBody('userId') userId: number,
   ) {
     this.chatService.inviteUser(client.chat.id, userId);
-    this.server.to(`user-${userId}`).emit('single:chat:inviteUser', {
+    this.server.to(`room:user:${userId}`).emit('single:chat:inviteUser', {
       chatId: client.chat.id,
       sourceId: client.user.id,
     });
