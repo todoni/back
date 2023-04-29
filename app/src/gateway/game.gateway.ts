@@ -67,7 +67,10 @@ class GameGateway extends BaseGateway {
   }
 
   @SubscribeMessage('watchGame')
-  watchGame(@ConnectedSocket() client: ClientSocket, gameId: number) {
+  watchGame(
+    @ConnectedSocket() client: ClientSocket,
+    @MessageBody('gameId') gameId: number,
+  ) {
     const gameSession = this.gameService.waitGame(gameId, client.user.id);
     client.set(IC_TYPE.GAME, gameId);
 
