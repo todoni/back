@@ -194,7 +194,6 @@ class ChatGateway extends BaseGateway {
     this.server
       .to(client.chat.room)
       .emit('group:chat:muteUser', { userId: userId });
-    c;
   }
 
   /* ============================== */

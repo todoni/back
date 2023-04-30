@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 
 import UserSocketState from '@dto/user/user.socket.state';
 
-interface IdentityContiguration {
+export class IdentityContiguration {
   id: number;
   room: string;
 }
@@ -19,17 +19,8 @@ class ClientSocket extends Socket {
   game: IdentityContiguration;
   state: UserSocketState;
 
-  set(type: IC_TYPE, value: number) {
-    this[type].id = value;
-    this[type].room = `room:${type}:${value}`;
-    this.join(this[type].room);
-  }
-
-  clear(type: IC_TYPE) {
-    this.leave(this[type].room);
-    this[type].id = undefined;
-    this[type].room = undefined;
-  }
+  set: Function;
+  clear: Function;
 }
 
 export default ClientSocket;

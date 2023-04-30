@@ -10,10 +10,6 @@ async function bootstrap() {
 
   app.use(cookieParser(process.env.JWT_SECRET));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-  app.enableCors({
-    origin: '*',
-    credentials: true,
-  });
 
   await app.listen(port, () => {
     console.log(`======= ENV: ${process.env.NODE_ENV} =======`);

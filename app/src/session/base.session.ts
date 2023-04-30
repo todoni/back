@@ -7,6 +7,10 @@ class BaseSession<T> {
     return ++this.sequence;
   }
 
+  public size(): number {
+    return this.store.size;
+  }
+
   public get(key: number): T {
     return this.store.get(key);
   }
