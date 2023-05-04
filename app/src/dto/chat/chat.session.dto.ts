@@ -23,8 +23,8 @@ class ChatPrivateDto {
 }
 
 class ChatSessionDto {
-  public: ChatPublicDto;
-  private: ChatPrivateDto;
+  public = new ChatPublicDto();
+  private = new ChatPrivateDto();
 }
 
 export default ChatSessionDto;

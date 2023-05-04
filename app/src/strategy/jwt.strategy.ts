@@ -17,8 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
-          console.log(request.cookies)
-          return request.cookies.token
+          console.log(request.cookies);
+          return request.cookies.token;
         },
       ]),
       ignoreExpiration: false,
@@ -37,11 +37,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
 
     //만료되지는 않은 토큰인데, 찾아보니 디비에 저장된 유저이고, firstAccess가 true이면 false로 처리
-    const user =  await this.userService.findByUserId(req['id']);
-    if (user.firstAccess === true){
+    const user = await this.userService.findByUserId(req['id']);
+    if (user.firstAccess === true) {
       await this.userService.firstAccess(user);
     }
-    
 
     return user;
   }

@@ -10,6 +10,9 @@ export class SocketGlobalFilter extends BaseWsExceptionFilter {
     const client: ClientSocket = host.switchToWs().getClient();
     let error: SocketException = undefined;
 
+    // console.log(exception);
+    client.emit('single:user:error', exception);
+
     if (exception instanceof HttpException) {
       error = new SocketException();
     } else {
@@ -19,7 +22,5 @@ export class SocketGlobalFilter extends BaseWsExceptionFilter {
       //   exception.stack,
       // );
     }
-
-    client.emit('single:user:error', error);
   }
 }

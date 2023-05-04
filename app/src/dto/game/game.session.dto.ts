@@ -33,8 +33,8 @@ export class GamePrivateDto {
 }
 
 class GameSessionDto {
-  public: GamePublicDto;
-  private: GamePrivateDto;
+  public = new GamePublicDto();
+  private = new GamePrivateDto();
 }
 
 export default GameSessionDto;
