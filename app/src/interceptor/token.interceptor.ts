@@ -38,20 +38,21 @@ export class TokenInterceptor implements NestInterceptor {
         res.cookie('token', tokenResult.access_token, {
           httpOnly: true,
           maxAge: 432000000000,
-          domain: this.configService.get("serverConfig.url"),
+          domain: this.configService.get('serverConfig.url'),
         });
         res.header('token', tokenResult.access_token);
 
         // return result;
         if (result.status === 302) {
-          res.cookie('token', tokenResult.access_token, {
-            httpOnly: true,
-            maxAge: 432000000000,
-            domain: this.configService.get("serverConfig.url"),
-            sameSite: 'none', // todo: 배포 시 strict로 변경
-            secure: true,
-            path: '/'
-          }).redirect("http://10.11.3.2:3000/lobby");
+          res
+            .cookie('token', tokenResult.access_token, {
+              httpOnly: true,
+              maxAge: 432000000000,
+              sameSite: 'none', // todo: 배포 시 strict로 변경
+              secure: true,
+              path: '/',
+            })
+            .redirect('http://localhost:3001/socket'); // todo: request의 origin 또는 고정 origin 지정
         } else {
           return {
             status: result.status,

@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.SERVER_PORT || 3000;
 
-  app.use(cookieParser(process.env.JWT_SECRET));
+  app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   await app.listen(port, () => {

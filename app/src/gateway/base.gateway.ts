@@ -18,14 +18,7 @@ import SocketSession from '@session/socket.session';
 
 export const GatewayInjector = (namespace: string): ClassDecorator => {
   const port = 4000;
-  const options: GatewayMetadata = {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
-      credentials: true,
-    },
-    namespace,
-  };
+  const options: GatewayMetadata = { namespace };
 
   return WebSocketGateway(port, options);
 };

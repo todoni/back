@@ -1,7 +1,8 @@
 export const envConfig = () => ({
   serverConfig: {
     port: parseInt(process.env.SERVER_PORT, 10) || 3000,
-    uirl: process.env.SERVER_URL,
+    url: process.env.SERVER_URL,
+    clientUrl: process.env.CLIENT_URL
   },
   ftConfig: {
     uid: process.env.CLIENT_ID_42,
