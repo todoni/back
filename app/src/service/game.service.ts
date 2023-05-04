@@ -21,6 +21,10 @@ class GameService {
   /*        Public Method         */
   /* ============================ */
 
+  getAllGame() {
+    return this.gameSession.getAllGame();
+  }
+
   get(gameId: number) {
     return this.gameSession.get(gameId);
   }

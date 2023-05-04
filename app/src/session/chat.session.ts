@@ -8,6 +8,10 @@ class ChatSession extends BaseSession<ChatSessionDto> {
   constructor() {
     super();
   }
+
+  getAllChat() {
+    return [...this.store.entries()].map(([_, chat]) => chat.public);
+  }
 }
 
 export default ChatSession;

@@ -6,7 +6,7 @@ import UserSession from '@session/user.session';
 
 @Module({
   providers: [ChatSession, GameSession, UserSession],
-  exports: [ChatSession, GameSession, UserSession]
+  exports: [ChatSession, GameSession, UserSession],
 })
 class SessionModule {}
 

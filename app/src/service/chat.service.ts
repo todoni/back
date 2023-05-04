@@ -20,6 +20,10 @@ class ChatService {
   /*        Public Method         */
   /* ============================ */
 
+  getAllChat() {
+    return this.chatSession.getAllChat();
+  }
+
   async createChat(
     userId: number,
     createChatDto: CreateChatDto,

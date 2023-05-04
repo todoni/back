@@ -17,6 +17,14 @@ export default class UserRepository extends Repository<User> {
     return query;
   }
 
+  async findUserAllDetail(userId: number): Promise<User | null> {
+    return await this.createQueryBuilder('users')
+      .leftJoinAndSelect('users.friends', 'friends')
+      .leftJoinAndSelect('users.blocks', 'blocks')
+      .where('users.id = :userId', { userId: userId })
+      .getOne();
+  }
+
   async findUserByName(name: string): Promise<User | null> {
     const query = await this.createQueryBuilder('users')
       .where('users.name = :username', { username: name })

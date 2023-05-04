@@ -8,6 +8,10 @@ class GameSession extends BaseSession<GameSessionDto> {
   constructor() {
     super();
   }
+
+  getAllGame() {
+    return [...this.store.entries()].map(([_, game]) => game.public);
+  }
 }
 
 export default GameSession;

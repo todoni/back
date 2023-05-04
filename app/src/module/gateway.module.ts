@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 
 import { UserModule } from '@module/user.module';
-import UserGateway from '@gateway/user.gateway';
-import ChatGateway from '@gateway/chat.gateway';
-import GameGateway from '@gateway/game.gateway';
-import ServiceModule from './service.module';
+import ServiceModule from '@module/service.module';
+import BaseGateway from '@gateway/base.gateway';
+import { AuthModule } from './auth.module';
 
 @Module({
-  imports: [ServiceModule, UserModule],
-  providers: [UserGateway, ChatGateway, GameGateway],
+  imports: [AuthModule, ServiceModule, UserModule],
+  providers: [BaseGateway],
 })
 class GatewayModule {}
 

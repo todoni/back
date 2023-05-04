@@ -12,7 +12,6 @@ export default class BlockRepository extends Repository<Block> {
   async findBlocks(userId: number): Promise<Block[]> {
     const query = await this.createQueryBuilder('blocks')
       .where('blocks.source_id = :userId', { userId: userId })
-      .orWhere('blocks.target_id = :userId', { userId: userId })
       .getMany();
     return query;
   }

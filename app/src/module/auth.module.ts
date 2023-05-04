@@ -11,6 +11,8 @@ import { AuthService } from '@service/auth.service';
 import { UserService } from '@service/user.service';
 import { TokenInterceptor } from '@interceptor/token.interceptor';
 import repositories from '@util/repository';
+import SessionModule from './session.module';
+import UserSession from '@session/user.session';
 
 @Module({
   imports: [
@@ -27,12 +29,14 @@ import repositories from '@util/repository';
       }),
     }),
     UserModule,
+    SessionModule,
   ],
   controllers: [AuthController],
   providers: [
     TokenInterceptor,
     AuthService,
     UserService,
+    UserSession,
     JwtStrategy,
     ConfigService,
     FtStrategy,
