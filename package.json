@@ -7,8 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "deploy:dev": "cross-env NODE_ENV=development node dist/main.js",
-    "deploy:prod": "cross-env NODE_ENV=production pm2 start dist/main.js",
+    "deploy:dev": "yarn build && cross-env NODE_ENV=development node dist/main.js",
+    "deploy:prod": "yarn build && cross-env NODE_ENV=production pm2 start dist/main.js",
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:prod": "cross-env NODE_ENV=production nest start --watch"
   },
