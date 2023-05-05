@@ -1,14 +1,12 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
 import entities from '@util/entity';
-import { AppService } from '@service/app.service';
 import { envConfig } from '@config/config';
 import { AuthModule } from '@module/auth.module';
 import { UserModule } from '@module/user.module';
-import { TestModule } from '@module/test.moule';
 import GatewayModule from '@module/gateway.module';
 import ServiceModule from '@module/service.module';
 import SessionModule from '@module/session.module';
@@ -18,7 +16,6 @@ import SessionModule from '@module/session.module';
     AuthModule,
     JwtModule,
     UserModule,
-    TestModule,
     GatewayModule,
     ServiceModule,
     SessionModule,
@@ -26,7 +23,6 @@ import SessionModule from '@module/session.module';
       isGlobal: true,
       envFilePath: '.env',
       load: [envConfig],
-      // validationSchema: envValidation(),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -43,11 +39,7 @@ import SessionModule from '@module/session.module';
       }),
     }),
   ],
-  providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    //미들웨어
-    // consumer.apply(LoggerMiddleware).forRoutes(AuthController);
-  }
-}
+class AppModule {}
+
+export default AppModule;

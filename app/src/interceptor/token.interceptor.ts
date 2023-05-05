@@ -28,34 +28,32 @@ export class TokenInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map(async (result: AuthResponseDto) => {
         const res: Response = context.switchToHttp().getResponse();
-        const temp: User = context.switchToHttp().getRequest().user;
-        const user = await this.userService.findUserByUsername(temp.name);
+        const user: User = context.switchToHttp().getRequest().user;
 
-        const tokenResult = await this.authService.getJwtToken(
-          user.name,
-          user.id,
-        );
-        res.cookie('token', tokenResult.access_token, {
-          httpOnly: true,
-          maxAge: 432000000000,
-          domain: this.configService.get('serverConfig.url'),
-        });
-        res.header('token', tokenResult.access_token);
+        if (!result.twoFactor) {
+          const tokenResult = await this.authService.getJwtToken(
+            user.name,
+            user.id,
+          );
+          res.cookie('token', tokenResult.access_token, {
+            httpOnly: true,
+            maxAge: 432000000000,
+            sameSite: 'none', // todo: 배포 시 strict로 변경
+            secure: true,
+            path: '/',
+          });
+        }
 
-        // return result;
         if (result.status === 302) {
-          res
-            .cookie('token', tokenResult.access_token, {
-              httpOnly: true,
-              maxAge: 432000000000,
-              sameSite: 'none', // todo: 배포 시 strict로 변경
-              secure: true,
-              path: '/',
-            })
-            .redirect('http://localhost:3001/socket'); // todo: request의 origin 또는 고정 origin 지정
+          const clientUrl =
+            process.env.NODE_ENV === 'production'
+              ? this.configService.get('serverConfig.clientUrl')
+              : res.req.headers.referer;
+          res.redirect(`${clientUrl}${result.redirectPath}`);
         } else {
           return {
             status: result.status,
+            message: result.message,
           };
         }
       }),
