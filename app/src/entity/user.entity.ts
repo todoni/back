@@ -17,11 +17,8 @@ export class User extends Common {
   @Column('varchar', { length: 20 })
   nickname: string;
 
-  @Column({ name: 'tw_factor', default: false })
-  twoFactor: boolean;
-
-  @Column('varchar', { name: 'tw_factor_uid', length: 100, nullable: true })
-  twoFactorUid: string;
+  @Column({ name: 'tw_factor', nullable: true })
+  twoFactor: string;
 
   @Column('varchar', { length: 255 })
   profile: string;

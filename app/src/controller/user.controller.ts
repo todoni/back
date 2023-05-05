@@ -7,11 +7,6 @@ import { UserService } from '@service/user.service';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @Get('add-new')
-  test(): string {
-    this.userService.testAddUser();
-    return 'test';
-  }
 
   @Get('detail')
   @UseGuards(JwtAuthGuard)

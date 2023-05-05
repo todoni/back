@@ -24,15 +24,6 @@ export class UserService {
     private readonly gameLogRepository: GameLogRepository,
     private readonly userAchievementRepository: UserAchievementRepository,
   ) {}
-  testAddUser(): void {
-    this.userRepository.save({
-      name: 'name1',
-      nickname: 'nickname1',
-      twoFactor: false,
-      twoFactorUid: '123',
-      profile: '',
-    });
-  }
 
   getAllUserForSocket(userId: number) {
     return this.userSession
@@ -85,7 +76,6 @@ export class UserService {
     user.name = userDto.name;
     user.nickname = userDto.nickname;
     user.twoFactor = userDto.twoFactor;
-    user.twoFactorUid = userDto.twoFactorUid;
     user.profile = userDto.profile;
 
     await this.userRepository.save(userDto);

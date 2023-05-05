@@ -8,8 +8,7 @@ export class UserDto {
   id: number;
   name: string;
   nickname: string;
-  twoFactor: boolean;
-  twoFactorUid: string;
+  twoFactor: string;
   profile: string;
   firstAccess: boolean;
 }
@@ -17,8 +16,7 @@ export class UserDto {
 export class UserDetailDto {
   name: string;
   nickname: string;
-  twoFactor: boolean;
-  twoFactorUid: string;
+  twoFactor: string;
   profile: string;
   level: number;
   firstAccess: boolean;
@@ -41,7 +39,6 @@ export class UserDetailDto {
     temp.name = user.name;
     temp.nickname = user.nickname;
     temp.twoFactor = user.twoFactor;
-    temp.twoFactorUid = user.twoFactorUid;
     temp.profile = user.profile;
     temp.firstAccess = user.firstAccess;
     temp.level = gameLogList.length * 10;
