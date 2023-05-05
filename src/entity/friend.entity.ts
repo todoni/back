@@ -5,10 +5,10 @@ import { User } from '@entity/user.entity';
 
 @Entity('friends')
 export class Friend extends Common {
-  @PrimaryColumn('bigint', { name: 'source_id' })
+  @PrimaryColumn('int', { name: 'source_id' })
   sourceId: number;
 
-  @PrimaryColumn('bigint', { name: 'target_id' })
+  @PrimaryColumn('int', { name: 'target_id' })
   targetId: number;
 
   @ManyToOne(() => User, (user) => user.id)

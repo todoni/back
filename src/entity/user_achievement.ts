@@ -6,10 +6,10 @@ import { User } from '@entity/user.entity';
 
 @Entity('user_achievements')
 export class UserAchievement extends Common {
-  @PrimaryColumn('bigint', { name: 'user_id' })
+  @PrimaryColumn('int', { name: 'user_id' })
   userId: number;
 
-  @PrimaryColumn('bigint', { name: 'achievement_id' })
+  @PrimaryColumn('int', { name: 'achievement_id' })
   achievementId: number;
 
   @ManyToOne(() => User, (user) => user.id)

@@ -11,13 +11,13 @@ import { User } from '@entity/user.entity';
 
 @Entity('game_logs')
 export class GameLog extends Common {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn('increment', { type: 'int' })
   id: number;
 
-  @Column('bigint', { name: 'winner_id' })
+  @Column('int', { name: 'winner_id' })
   winnerId: number;
 
-  @Column('bigint', { name: 'looser_id' })
+  @Column('int', { name: 'looser_id' })
   looserId: number;
 
   @Column('smallint')

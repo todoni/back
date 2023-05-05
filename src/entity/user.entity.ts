@@ -8,7 +8,7 @@ import { UserAchievement } from '@entity/user_achievement';
 
 @Entity('users')
 export class User extends Common {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn('increment', { type: 'int' })
   id: number;
 
   @Column('varchar', { length: 20 })
