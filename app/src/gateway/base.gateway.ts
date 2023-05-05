@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import {
   ForbiddenException,
+  HttpException,
   ParseIntPipe,
   UseFilters,
   UseInterceptors,
@@ -18,6 +19,8 @@ import {
 import { Server } from 'socket.io';
 
 import ClientSocket, {
+  ChatConfiguration,
+  GameConfiguration,
   IC_TYPE,
   IdentityContiguration,
 } from '@dto/socket/client.socket';
@@ -33,6 +36,7 @@ import GameService from '@service/game.service';
 import ImageService from '@service/image.service';
 import GameSessionDto, { GamePlayerDto } from '@dto/game/game.session.dto';
 import { AuthService } from '@service/auth.service';
+import ExceptionMessage from '@dto/socket/exception.message';
 import SocketException from '@exception/socket.exception';
 
 @WebSocketGateway(4000)
@@ -52,20 +56,15 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   handleConnection(client: ClientSocket) {
-    /**
-     * todo:
-     *   - Access token 검사 로직 추가
-     *   - Client 세팅 로직 추가
-     *   - 현존하는 방, 유저 등 데이터 반환 로직 추가
-     */
     this.initSocket(client);
 
     try {
       const cookie = client.handshake.headers.cookie;
       const payload = this.authService.parseToken(cookie);
-      const userId = payload['id'];
+      const userId = parseInt(payload['id'], 10);
 
-      if (this.socketSession.has(userId)) throw new ForbiddenException();
+      if (this.socketSession.has(userId))
+        throw new ForbiddenException(ExceptionMessage.UNAUTHORIZED);
 
       client.set(IC_TYPE.USER, userId);
       this.userService.setUserForSocket(userId);
@@ -77,7 +76,15 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
         gameList: this.gameService.getAllGame(),
       });
     } catch (err) {
-      client.emit('single:user:error', new SocketException());
+      const exception = SocketException.fromOptions({
+        status: err instanceof HttpException ? err.getStatus() : 500,
+        message:
+          err instanceof HttpException
+            ? err.message
+            : ExceptionMessage.INTERNAL_ERROR,
+      });
+      client.emit('single:user:error', exception);
+      client.disconnect();
     }
   }
 
@@ -100,8 +107,8 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   initSocket(client: ClientSocket) {
     client.user = new IdentityContiguration();
-    client.chat = new IdentityContiguration();
-    client.game = new IdentityContiguration();
+    client.chat = new ChatConfiguration();
+    client.game = new GameConfiguration();
     client.set = (type: IC_TYPE, value: number) => {
       client[type].id = value;
       client[type].room = `room:${type}:${value}`;
@@ -134,6 +141,12 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.user.id,
       createChatDto,
     );
+    this.chatService.setOwner(
+      client,
+      chatSession.public.chatId,
+      client.user.id,
+      true,
+    );
     client.set(IC_TYPE.CHAT, chatSession.public.chatId);
 
     this.changeState(client, UserSocketState.IN_CHAT);
@@ -143,7 +156,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @UseInterceptors(
     new SocketValidationInterceptor('chat'),
-    new ChatAuthInterceptor({ hasChat: false }),
+    new ChatAuthInterceptor({ owner: true }),
   )
   @SubscribeMessage('updateChat')
   async updateChat(
@@ -165,9 +178,13 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('setAdmin')
   setAdmin(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('userId') userId: number,
+    @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
-    this.chatService.setAdmin(client.chat.id, userId);
+    this.chatService.setAdmin(
+      this.socketSession.get(userId),
+      client.chat.id,
+      userId,
+    );
     this.server.to(client.chat.room).emit('broadcast:chat:setAdmin', {
       chatId: client.chat.id,
       adminId: userId,
@@ -213,6 +230,18 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.emit('broadcast:chat:deleteChat', { chatId: client.chat.id });
     } else {
       if (chatState.ownerId || chatState.adminId) {
+        if (chatState.ownerId)
+          this.chatService.setOwner(
+            this.socketSession.get(chatState.ownerId),
+            client.chat.id,
+            chatState.ownerId,
+          );
+        if (chatState.adminId)
+          this.chatService.setAdmin(
+            this.socketSession.get(chatState.adminId),
+            client.chat.id,
+            chatState.adminId,
+          );
         this.server.emit('broadcast:chat:setAdmin', {
           chatId: client.chat.id,
           ownerId: chatState.ownerId,
@@ -252,7 +281,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('kickUser')
   kickUser(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('userId') userId: number,
+    @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
     const kickedClient = this.socketSession.get(userId);
     this.chatService.kickUser(client.chat.id, userId);
@@ -269,7 +298,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('muteUser')
   muteUser(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('userId') userId: number,
+    @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
     this.chatService.muteUser(client.chat.id, userId);
     this.server
@@ -286,7 +315,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendDirectMessage')
   sendDirectMessage(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('userId') userId: number,
+    @MessageBody('userId', ParseIntPipe) userId: number,
     @MessageBody('message') message: string,
   ) {
     this.chatService.sendMessage(client.chat.id, userId);
@@ -306,7 +335,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('inviteUser')
   inviteUser(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('userId') userId: number,
+    @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
     this.chatService.inviteUser(client.chat.id, userId);
     this.server.to(`room:user:${userId}`).emit('single:chat:inviteUser', {
@@ -334,19 +363,14 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  @UseInterceptors(new SocketValidationInterceptor('image', 'mimeType'))
+  @UseInterceptors(new SocketValidationInterceptor('image'))
   @SubscribeMessage('updateImage')
   async updateImage(
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('image') image: string,
-    @MessageBody('mimeType') mimeType: string,
   ) {
     const filename = `${client.user.id}`;
-    const imageUrl = await this.imageService.uploadImage(
-      filename,
-      image,
-      mimeType,
-    );
+    const imageUrl = await this.imageService.uploadImage(filename, image);
     this.userService.updateImage(client.user.id, imageUrl);
     this.server.emit('broadcast:user:updateImage', {
       userId: client.user.id,
@@ -360,7 +384,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('followUser')
   async follorUser(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('userId') userId: number,
+    @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
     await this.userService.followUser(client.user.id, userId);
     client.emit('single:user:followUser', { userId: userId });
@@ -370,7 +394,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('unFollowUser')
   async unFollorUser(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('userId') userId: number,
+    @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
     await this.userService.unFollowUser(client.user.id, userId);
     client.emit('single:user:unFollowUser', { userId: userId });
@@ -380,7 +404,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('blockUser')
   async blockUser(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('userId') userId: number,
+    @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
     await this.userService.blockUser(client.user.id, userId);
     client.emit('single:user:blockUser', { userId: userId });
@@ -395,12 +419,12 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('createGame')
   createGame(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('speed') speed: number,
+    @MessageBody('speed', ParseIntPipe) speed: number,
   ) {
     const gameSession = this.gameService.createGame(client.user.id, speed);
     client.set(IC_TYPE.GAME, gameSession.public.gameId);
 
-    this.changeState(client, UserSocketState.WAIT_GAME);
+    this.changeState(client, UserSocketState.IN_GAME);
     this.server.emit('broadcast:game:createGame', gameSession.public);
     client.emit('single:game:createGame', gameSession);
   }
@@ -410,12 +434,12 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('joinGame')
   joinGame(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('gameId') gameId: number,
+    @MessageBody('gameId', ParseIntPipe) gameId: number,
   ) {
     const gameSession = this.gameService.joinGame(gameId, client.user.id);
     client.set(IC_TYPE.GAME, gameId);
 
-    this.changeState(client, UserSocketState.WAIT_GAME);
+    this.changeState(client, UserSocketState.IN_GAME);
     this.server
       .to(client.game.room)
       .except(client.user.room)
@@ -426,15 +450,14 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('watchGame')
   watchGame(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('gameId') gameId: number,
+    @MessageBody('gameId', ParseIntPipe) gameId: number,
   ) {
     const gameSession = this.gameService.waitGame(gameId, client.user.id);
     client.set(IC_TYPE.GAME, gameId);
 
-    this.changeState(client, UserSocketState.WATChING_GAME);
+    this.changeState(client, UserSocketState.IN_GAME);
     this.server
       .to(client.game.room)
-      .except(client.user.room)
       .emit('group:game:watchGame', { userId: client.user.id });
     client.emit('single:game:watchGame', gameSession);
   }
@@ -445,21 +468,16 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.changeState(client, UserSocketState.ONLINE);
     if (isOwner) {
-      this.server
-        .except(client.game.room)
-        .emit('broadcast:game:deleteGame', { gameId: client.game.id });
-      this.server.to(client.game.room).emit('group:game:deleteGame');
+      this.server.emit('broadcast:game:deleteGame', { gameId: client.game.id });
     } else {
       this.server
         .to(client.game.room)
         .emit('group:game:leaveGame', { userId: client.user.id });
     }
     client.clear(IC_TYPE.GAME);
+    client.emit('single:chat:leaveGame');
   }
 
-  // todo: message로 받을 지 다시 생각
-  // todo: 구현하면서 로직 다시 생각해보자
-  // todo: owner 권한
   @SubscribeMessage('startGame')
   startGame(@ConnectedSocket() client: ClientSocket) {
     const gameSession = this.gameService.get(client.game.id);
@@ -486,12 +504,10 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }, 100);
   }
 
-  // todo: message로 받을 지 다시 생각
-  // todo: 구현하면서 로직 다시 생각해보자
   @SubscribeMessage('movePaddle')
   moveBall(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('keyCode') keyCode: number,
+    @MessageBody('keyCode', ParseIntPipe) keyCode: number,
   ) {
     if (keyCode !== 38 && keyCode !== 40) return;
 
