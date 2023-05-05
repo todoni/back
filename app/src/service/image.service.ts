@@ -16,15 +16,17 @@ class ImageService {
     });
   }
 
-  async uploadImage(filename: string, b64Image: string, mimeType: string) {
-    const image = Buffer.from(b64Image, 'base64');
+  async uploadImage(filename: string, b64Image: string) {
+    const [mimeType, base64] = b64Image.split(';base64,');
+    const image = Buffer.from(base64, 'base64');
+
     const result = await this.s3
       .upload({
         Bucket: this.configService.get('awsConfig.bucket'),
         Key: filename,
         Body: image,
         ACL: 'public-read',
-        ContentType: mimeType,
+        ContentType: mimeType.split(':')[1],
         ContentDisposition: 'inline',
       })
       .promise();

@@ -13,7 +13,7 @@ export const envConfig = () => ({
     uid: process.env.AWS_ACCESS_KEY,
     secret: process.env.AWS_SECRET_KEY,
     region: process.env.AWS_REGION,
-    bucket: process.env.AWS_BUCKET,
+    bucket: process.env.AWS_S3_BUCKET,
   },
   authConfig: {
     jwt: process.env.JWT_SECRET,
