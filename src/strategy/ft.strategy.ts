@@ -12,9 +12,9 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
     private readonly userService: UserService,
   ) {
     super({
-      clientID: configService.get('CLIENT_ID_42'),
-      clientSecret: configService.get('CLIENT_SECRET_42'),
-      callbackURL: configService.get('CALL_BACK_URL'),
+      clientID: configService.get('ftConfig.uid'),
+      clientSecret: configService.get('ftConfig.secret'),
+      callbackURL: configService.get('ftConfig.redirectUri'),
     });
   }
 
