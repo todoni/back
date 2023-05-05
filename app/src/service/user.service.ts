@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 import { UserDetailDto, UserDto } from '@dto/user/user.dto';
@@ -13,6 +14,8 @@ import UserRepository from '@repository/user.repository';
 import UserAchievementRepository from '@repository/user_achievement.repository';
 import UserSession from '@session/user.session';
 import UserSocketState from '@dto/user/user.socket.state';
+import EncryptionService from '@service/encryption.service';
+import ExceptionMessage from '@dto/socket/exception.message';
 
 @Injectable()
 export class UserService {
@@ -23,6 +26,7 @@ export class UserService {
     private readonly blockRepository: BlockRepository,
     private readonly gameLogRepository: GameLogRepository,
     private readonly userAchievementRepository: UserAchievementRepository,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   getAllUserForSocket(userId: number) {
@@ -40,8 +44,8 @@ export class UserService {
     const friends = await this.friendRepository.findFriends(userId);
     const blocks = await this.blockRepository.findBlocks(userId);
 
-    this.userSession.set(user.id, {
-      userId: user.id,
+    this.userSession.set(userId, {
+      userId: userId,
       username: user.name,
       state: UserSocketState.ONLINE,
       follows: friends.map((friend) => friend.sourceId),
@@ -53,7 +57,7 @@ export class UserService {
   async findByUserId(userId: number): Promise<User> {
     const result = await this.userRepository.findUser(userId);
     if (result == null) {
-      throw new NotFoundException();
+      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
     }
     return result;
   }
@@ -64,7 +68,7 @@ export class UserService {
   ): Promise<User | null> {
     const result = await this.userRepository.findUserByName(username);
     if (isTest == false && result == null) {
-      throw new NotFoundException();
+      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
     }
     return result;
   }
@@ -101,7 +105,7 @@ export class UserService {
     );
 
     if (user == null) {
-      throw new NotFoundException();
+      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
     }
 
     return result;
@@ -127,7 +131,7 @@ export class UserService {
     );
 
     if (user == null) {
-      throw new NotFoundException();
+      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
     }
 
     return result;
@@ -140,7 +144,8 @@ export class UserService {
   }
 
   async firstAccess(user: User) {
-    if (!user.firstAccess) throw new ForbiddenException();
+    if (!user.firstAccess)
+      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
 
     user.firstAccess = false;
 
@@ -169,5 +174,18 @@ export class UserService {
 
   async updateImage(userId: number, imageUrl: string) {
     await this.userRepository.updateImageUrl(userId, imageUrl);
+  }
+
+  async checkTwoFactor(user: User, code: string) {
+    if (!(await this.encryptionService.compare(code, user.twoFactor)))
+      throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED);
+  }
+
+  async updateTwoFactor(user: User, code: string) {
+    const password = !code.length
+      ? null
+      : await this.encryptionService.hash(code);
+    user.twoFactor = password;
+    this.userRepository.save(user);
   }
 }

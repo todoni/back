@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
+import ExceptionMessage from '@dto/socket/exception.message';
+
 class SocketValidationInterceptor implements NestInterceptor {
   private readonly keys: string[];
 
@@ -19,10 +21,12 @@ class SocketValidationInterceptor implements NestInterceptor {
   ): Observable<any> {
     const body: string | object = context.switchToWs().getData();
 
-    if (!(body instanceof Object)) throw new BadRequestException();
+    if (!(body instanceof Object))
+      throw new BadRequestException(ExceptionMessage.MISSING_PARAM);
 
     for (const key of this.keys)
-      if (!body.hasOwnProperty(key)) throw new BadRequestException();
+      if (!body.hasOwnProperty(key))
+        throw new BadRequestException(ExceptionMessage.MISSING_PARAM);
 
     return next.handle();
   }

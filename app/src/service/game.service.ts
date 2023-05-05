@@ -6,6 +6,7 @@ import GameSessionDto, {
   GamePlayerDto,
   GamePrivateDto,
 } from '@dto/game/game.session.dto';
+import ExceptionMessage from '@dto/socket/exception.message';
 
 @Injectable()
 class GameService {
@@ -54,7 +55,7 @@ class GameService {
     const gamePlayer = new GamePlayerDto();
 
     if (gameSession.private.players.length === 2)
-      throw new ForbiddenException();
+      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
 
     gamePlayer.userId = userId;
     gamePlayer.position = this.paddle.map((x) => (x + 1) * this.colSize + -2);
@@ -92,12 +93,14 @@ class GameService {
 
   initialRoundSetting(gamePrivate: GamePrivateDto, init = false) {
     if (!init) gamePrivate.round++;
-    gamePrivate.onRound = !init;
-    // todo: 공 델타 값 랜덤하게
-    gamePrivate.ball.position = Math.round((10 * 20) / 2) + 10;
-    gamePrivate.ball.deltaX = -1;
-    gamePrivate.ball.deltaY = -this.colSize;
+    const rand = Math.floor(Math.random() * 4);
+    const deltaX = [1, -1, 1, -1];
+    const deltaY = [-1, 1, 1, -1];
 
+    gamePrivate.onRound = !init;
+    gamePrivate.ball.position = Math.round((10 * 20) / 2) + 10;
+    gamePrivate.ball.deltaX = -1 * deltaX[rand];
+    gamePrivate.ball.deltaY = -this.colSize * deltaY[rand];
     gamePrivate.players.map((player, idx) => {
       player.position = this.paddle.map(
         (x) => (x + idx) * this.colSize + (!idx ? 1 : -1) * (idx + 1),
@@ -172,7 +175,8 @@ class GameService {
       (player) => player.userId === userId,
     );
 
-    if (playerIndex === -1) throw new ForbiddenException();
+    if (playerIndex === -1)
+      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
     const player = gameSession.private.players[playerIndex];
     const edge =
       keyCode === this.upKey ? player.position[0] : player.position[2];

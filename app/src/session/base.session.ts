@@ -1,3 +1,7 @@
+import { NotFoundException } from '@nestjs/common';
+
+import ExceptionMessage from '@dto/socket/exception.message';
+
 class BaseSession<T> {
   protected store = new Map<number, T>();
 
@@ -12,6 +16,8 @@ class BaseSession<T> {
   }
 
   public get(key: number): T {
+    if (!this.store.has(key))
+      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
     return this.store.get(key);
   }
 

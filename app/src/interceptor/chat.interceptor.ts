@@ -7,7 +7,7 @@ import {
 import { Observable } from 'rxjs';
 
 import ClientSocket from '@dto/socket/client.socket';
-import ChatSessionDto from '@dto/chat/chat.session.dto';
+import ExceptionMessage from '@dto/socket/exception.message';
 
 interface ChatAuthInterceptorParam {
   hasChat?: boolean;
@@ -15,14 +15,10 @@ interface ChatAuthInterceptorParam {
   owner?: boolean;
 }
 
-// todo: create: ChannelGameInterceptor 만들어야함
-
 export class ChatAuthInterceptor implements NestInterceptor {
   private readonly hasChat: boolean;
   private readonly admin: boolean;
   private readonly owner: boolean;
-
-  // todo: 게임 중인 사람인지 확인하는 flag 세워야함
 
   constructor(param: ChatAuthInterceptorParam = {}) {
     this.hasChat = param.hasChat !== undefined ? param.hasChat : true;
@@ -38,21 +34,18 @@ export class ChatAuthInterceptor implements NestInterceptor {
 
     if (
       (this.hasChat && !client.chat.id) ||
-      (!this.hasChat && client.chat.id)
+      (!this.hasChat && client.chat.id) ||
+      client.game.id
     ) {
-      throw new ForbiddenException();
+      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
     }
-
-    const chatSession = new ChatSessionDto();
 
     if (
       this.hasChat &&
-      ((this.admin &&
-        chatSession.public.adminId !== client.user.id &&
-        chatSession.public.ownerId !== client.user.id) ||
-        (this.owner && chatSession.public.ownerId !== client.user.id))
+      ((this.admin && !client.chat.isAdmin && !client.chat.isOwner) ||
+        (this.owner && !client.chat.isOwner))
     ) {
-      throw new ForbiddenException();
+      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
     }
 
     return next.handle();

@@ -8,6 +8,8 @@ import ChatSessionDto, {
 } from '@dto/chat/chat.session.dto';
 import ChatType from '@dto/chat/chat.type';
 import EncryptionService from '@service/encryption.service';
+import ClientSocket from '@dto/socket/client.socket';
+import ExceptionMessage from '@dto/socket/exception.message';
 
 @Injectable()
 class ChatService {
@@ -68,9 +70,22 @@ class ChatService {
     return chatSession.public;
   }
 
-  setAdmin(chatId: number, userId: number) {
+  setAdmin(client: ClientSocket, chatId: number, userId: number) {
+    client.chat.isAdmin = true;
     const chatSession = this.chatSession.get(chatId);
     this.changeAdmin(chatSession, userId);
+  }
+
+  setOwner(
+    client: ClientSocket,
+    chatId: number,
+    userId: number,
+    alsoAdmin = false,
+  ) {
+    client.chat.isOwner = true;
+    const chatSession = this.chatSession.get(chatId);
+    chatSession.public.ownerId = userId;
+    if (alsoAdmin) this.setAdmin(client, chatId, userId);
   }
 
   async joinChat(
@@ -139,7 +154,7 @@ class ChatService {
   sendMessage(chatId: number, userId: number) {
     const chatSession = this.chatSession.get(chatId);
     if (this.isControlledUser(chatSession.private.muted, userId))
-      throw new ForbiddenException();
+      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
   }
 
   kickUser(chatId: number, userId: number) {

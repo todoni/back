@@ -7,6 +7,8 @@ import {
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
+import ExceptionMessage from '@dto/socket/exception.message';
+
 @Injectable()
 export class ValidationPipe implements PipeTransform {
   async transform(value: any, metadata: ArgumentMetadata) {
@@ -16,7 +18,7 @@ export class ValidationPipe implements PipeTransform {
     const object = plainToInstance(metadata.metatype, value);
     const errors = await validate(object);
     if (errors.length > 0) {
-      throw new BadRequestException('Validation failed');
+      throw new BadRequestException(ExceptionMessage.MISSING_PARAM);
     }
     return value;
   }

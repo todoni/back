@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from '@service/user.service';
+import ExceptionMessage from '@dto/socket/exception.message';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,9 @@ export class AuthService {
   ) {}
 
   parseToken(cookies: string) {
+    if (!cookies)
+      throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED);
+
     const token = cookies
       .split('; ')
       .find((cookie) => {

@@ -13,6 +13,7 @@ import { TokenInterceptor } from '@interceptor/token.interceptor';
 import repositories from '@util/repository';
 import SessionModule from './session.module';
 import UserSession from '@session/user.session';
+import ServiceModule from '@module/service.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import UserSession from '@session/user.session';
     }),
     UserModule,
     SessionModule,
+    ServiceModule,
   ],
   controllers: [AuthController],
   providers: [
