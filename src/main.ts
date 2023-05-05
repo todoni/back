@@ -10,6 +10,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.setGlobalPrefix('/v0');
 
   await app.listen(port, () => {
     console.log(`======= ENV: ${process.env.NODE_ENV} =======`);

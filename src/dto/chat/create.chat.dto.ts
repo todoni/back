@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, NotEquals } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
 import ChatType from '@dto/chat/chat.type';
 import ExceptionMessage from '@dto/socket/exception.message';
@@ -9,7 +9,7 @@ class CreateChatDto {
   name: string;
 
   @IsNotEmpty({ message: ExceptionMessage.MISSING_PARAM })
-  @NotEquals(ChatType, { message: ExceptionMessage.MISSING_PARAM })
+  @IsEnum(ChatType, { message: ExceptionMessage.MISSING_PARAM })
   type: ChatType;
 
   @IsOptional()

@@ -45,11 +45,8 @@ export class TokenInterceptor implements NestInterceptor {
         }
 
         if (result.status === 302) {
-          const clientUrl =
-            process.env.NODE_ENV === 'production'
-              ? this.configService.get('serverConfig.clientUrl')
-              : res.req.headers.referer;
-          res.redirect(`${clientUrl}${result.redirectPath}`);
+          const clientUrl = this.configService.get('serverConfig.clientUrl');
+          res.redirect(`${clientUrl}/${result.redirectPath}`);
         } else {
           return {
             status: result.status,

@@ -49,10 +49,17 @@ export class UserService {
       throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
   }
 
+  setStateForSocket(userId: number, state: UserSocketState) {
+    const user = this.userSession.get(userId);
+    user.state = state;
+  }
+
   async setUserForSocket(userId: number) {
     const user = await this.userRepository.findUser(userId);
     const friends = await this.friendRepository.findFriends(userId);
     const blocks = await this.blockRepository.findBlocks(userId);
+
+    if (!user) throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED);
 
     this.userSession.set(userId, {
       userId: userId,
@@ -91,15 +98,12 @@ export class UserService {
   async createUser(userDto: UserDto) {
     const user = this.userRepository.create();
 
-    user.id = userDto.id;
     user.name = userDto.name;
     user.nickname = userDto.nickname;
     user.twoFactor = userDto.twoFactor;
     user.profile = userDto.profile;
 
-    await this.userRepository.save(userDto);
-
-    return user;
+    return await this.userRepository.save(userDto);
   }
 
   async getUserDetail(user: User): Promise<UserDetailDto> {

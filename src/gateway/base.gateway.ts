@@ -87,17 +87,21 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleDisconnect(client: ClientSocket) {
-    if (client.chat.id) this.leaveChat(client);
-    if (client.game.id) this.leaveGame(client);
+    try {
+      if (client.chat.id) this.leaveChat(client);
+      if (client.game.id) this.leaveGame(client);
 
-    this.changeState(client, UserSocketState.OFFLINE);
-    this.userService.deleteUserForSocket(client.user.id);
-    this.socketSession.delete(client.user.id);
-    client.clear(IC_TYPE.USER);
+      this.changeState(client, UserSocketState.OFFLINE);
+      this.userService.deleteUserForSocket(client.user.id);
+      this.socketSession.delete(client.user.id);
+      client.clear(IC_TYPE.USER);
+    } catch (err) {}
   }
 
   changeState(client: ClientSocket, state: UserSocketState) {
+    console.log(client.user.id, state);
     client.state = state;
+    this.userService.setStateForSocket(client.user.id, state);
     this.server.emit(
       'broadcast:user:changeState',
       this.userService.getUserInfoForSocket(client.user.id),
@@ -283,7 +287,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
     const kickedClient = this.socketSession.get(userId);
-    this.chatService.kickUser(client.chat.id, userId);
+    this.chatService.kickUser(client.chat.id, client.user.id, userId);
     this.server
       .to(client.chat.room)
       .emit('group:chat:kickUser', { userId: userId });
@@ -299,7 +303,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
-    this.chatService.muteUser(client.chat.id, userId);
+    this.chatService.muteUser(client.chat.id, client.user.id, userId);
     this.server
       .to(client.chat.room)
       .emit('group:chat:muteUser', { userId: userId });

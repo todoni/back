@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import ChatSession from '@session/chat.session';
 import CreateChatDto from '@dto/chat/create.chat.dto';
@@ -42,6 +47,8 @@ class ChatService {
     chatSession.private.users.push(userId);
 
     if (createChatDto.type === ChatType.PROTECTED) {
+      if (!createChatDto.password || !createChatDto.password.length)
+        throw new BadRequestException(ExceptionMessage.MISSING_PARAM);
       chatSession.private.password = await this.encryptionService.hash(
         createChatDto.password,
       );
@@ -122,7 +129,7 @@ class ChatService {
     const chatSession = this.chatSession.get(chatId);
     const chatState = {
       room: chatSession.private.room,
-      userExist: false,
+      userExist: true,
       ownerId: undefined,
       adminId: undefined,
     };
@@ -142,7 +149,8 @@ class ChatService {
             : chatSession.public.adminId;
         chatState.ownerId = ownerId;
         chatSession.public.ownerId = ownerId;
-      } else if (chatSession.public.adminId === userId) {
+      }
+      if (chatSession.public.adminId === userId) {
         const adminId = this.changeAdmin(chatSession);
         chatState.adminId = adminId;
       }
@@ -157,20 +165,14 @@ class ChatService {
       throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
   }
 
-  kickUser(chatId: number, userId: number) {
+  kickUser(chatId: number, sourceId: number, targetId: number) {
     const chatSession = this.chatSession.get(chatId);
-    chatSession.private.kicked.push({
-      userId: userId,
-      expiredAt: Date.now() + 5 * 60 * 1000,
-    });
+    this.setControllUser('kicked', chatSession, sourceId, targetId);
   }
 
-  muteUser(chatId: number, userId: number) {
+  muteUser(chatId: number, sourceId: number, targetId: number) {
     const chatSession = this.chatSession.get(chatId);
-    chatSession.private.muted.push({
-      userId: userId,
-      expiredAt: Date.now() + 5 * 60 * 1000,
-    });
+    this.setControllUser('muted', chatSession, sourceId, targetId);
   }
 
   inviteUser(chatId: number, userId: number) {
@@ -195,8 +197,39 @@ class ChatService {
 
   private changeAdmin(chatSession: ChatSessionDto, userId?: number) {
     const adminId = userId ? userId : chatSession.public.ownerId;
+    if (chatSession.private.users.indexOf(adminId) === -1)
+      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
     chatSession.public.adminId = adminId;
     return adminId;
+  }
+
+  private setControllUser(
+    type: string,
+    chat: ChatSessionDto,
+    sourceId: number,
+    targetId: number,
+  ) {
+    if (
+      sourceId === targetId ||
+      (sourceId !== chat.public.ownerId && targetId === chat.public.ownerId) ||
+      chat.private.users.indexOf(targetId) === -1
+    ) {
+      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+    }
+
+    const expiredAt = Date.now() + 5 * 60 * 1000;
+    const existUser: ChatControlledUserDto = chat.private[type].find(
+      (user: ChatControlledUserDto) => user.userId === targetId,
+    );
+
+    if (existUser) {
+      existUser.expiredAt = expiredAt;
+    } else {
+      chat.private[type].push({
+        userId: targetId,
+        expiredAt: expiredAt,
+      });
+    }
   }
 }
 
