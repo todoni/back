@@ -1,18 +1,10 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Long,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Achievement } from './achievement.entity';
-import { Block } from './block.entity';
-import { Common } from './common/common.entity';
-import { Friend } from './friend.entity';
-import { GameLog } from './game_log.entity';
-import { UserAchievement } from './user_achievement';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Block } from '@entity/block.entity';
+import { Common } from '@entity/common/common.entity';
+import { Friend } from '@entity/friend.entity';
+import { GameLog } from '@entity/game_log.entity';
+import { UserAchievement } from '@entity/user_achievement';
 
 @Entity('users')
 export class User extends Common {
@@ -22,14 +14,20 @@ export class User extends Common {
   @Column('varchar', { length: 20 })
   name: string;
 
-  @Column({ name: 'tw_factor', default: false })
-  twoFactor: boolean;
+  @Column('varchar', { length: 20 })
+  nickname: string;
 
-  @Column('varchar', { name: 'tw_factor_uid', length: 100, nullable: true })
-  twoFactorUid: string;
+  @Column({ name: 'tw_factor', nullable: true })
+  twoFactor: string;
 
   @Column('varchar', { length: 255 })
   profile: string;
+
+  @Column({ name: 'first_access', default: false })
+  firstAccess: boolean;
+
+  @Column('varchar', { name: 'refresh_token', length: 255, nullable: true })
+  refreshToken: string;
 
   //////////////////////////////////////////////
 
@@ -45,11 +43,9 @@ export class User extends Common {
   @OneToMany(() => Block, (block) => block.targetUser, { cascade: true })
   targetBlocks: Block[];
 
-  @OneToMany(
-    () => UserAchievement,
-    (UserAchievement) => UserAchievement.achievement,
-    { cascade: true },
-  )
+  @OneToMany(() => UserAchievement, (UserAchievement) => UserAchievement.user, {
+    cascade: true,
+  })
   achievements: UserAchievement[];
 
   @OneToMany(() => GameLog, (log) => log.winner, { cascade: true })

@@ -1,26 +1,14 @@
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  Entity,
-  Long,
-  ManyToOne,
-  JoinColumn,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Common } from './common/common.entity';
-import { User } from './user.entity';
+import { Entity, ManyToOne, JoinColumn, PrimaryColumn } from 'typeorm';
+
+import { Common } from '@entity/common/common.entity';
+import { User } from '@entity/user.entity';
 
 @Entity('blocks')
 export class Block extends Common {
   @PrimaryColumn('bigint', { name: 'source_id' })
-  // @Column('bigint', { name: 'source_id' })
   sourceId: number;
 
   @PrimaryColumn('bigint', { name: 'target_id' })
-  // @Column('bigint', { name: 'target_id' })
   targetId: number;
 
   @ManyToOne(() => User, (user) => user.id)

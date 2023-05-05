@@ -1,11 +1,49 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { AuthController } from 'src/controller/auth.controller';
-import { FtStrategy } from 'src/strategy/ft.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { UserModule } from '@module/user.module';
+import { AuthController } from '@controller/auth.controller';
+import { FtStrategy } from '@strategy/ft.strategy';
+import { JwtStrategy } from '@strategy/jwt.strategy';
+import { AuthService } from '@service/auth.service';
+import { UserService } from '@service/user.service';
+import { TokenInterceptor } from '@interceptor/token.interceptor';
+import repositories from '@util/repository';
+import SessionModule from './session.module';
+import UserSession from '@session/user.session';
+import ServiceModule from '@module/service.module';
 
 @Module({
-  imports: [PassportModule.register({ session: true })],
+  imports: [
+    PassportModule.register({ session: true }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          algorithm: configService.get('JWT_ALGORITHM'),
+          expiresIn: configService.get<string>('JWT_EXPIRED_IN'),
+        },
+      }),
+    }),
+    UserModule,
+    SessionModule,
+    ServiceModule,
+  ],
   controllers: [AuthController],
-  providers: [FtStrategy],
+  providers: [
+    TokenInterceptor,
+    AuthService,
+    UserService,
+    UserSession,
+    JwtStrategy,
+    ConfigService,
+    FtStrategy,
+    ...repositories,
+  ],
+  exports: [AuthService, TokenInterceptor],
 })
 export class AuthModule {}
