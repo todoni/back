@@ -2,8 +2,13 @@ import {
   Controller,
   Get,
   UseGuards,
-  Req, Res,
+  Req,
+  Res,
   UseInterceptors,
+  Post,
+  Patch,
+  Body,
+  Param,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -27,7 +32,6 @@ export class AuthController {
   @Get('login')
   @UseGuards(FtAuthGuard)
   login(): AuthResponseDto {
-    console.log('Enter login controller!');
     return { status: 200, message: 'OK' };
   }
 
@@ -35,54 +39,41 @@ export class AuthController {
   @UseGuards(FtAuthGuard)
   @UseInterceptors(TokenInterceptor)
   async callback(@Req() req): Promise<AuthResponseDto> {
-    console.log('Enter callback controller!');
-    return { status: 302, message: 'OK' };
+    const user: User = req.user;
+    if (!user.twoFactor)
+      return { status: 302, message: 'OK', redirectPath: 'lobby' };
+    else return { status: 200, message: '2단계 인증 필요', twoFactor: true };
   }
 
   @Get('logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@Req() req, @Res() res : Response): Promise<any> {
-    console.log('Enter logout controller!');
+  async logout(@Req() req, @Res() res: Response): Promise<any> {
     const user = req.user;
-    const tokenResult = await this.authService.getJwtToken(
-      user.name,
-      user.id,
-    );
+    const tokenResult = await this.authService.getJwtToken(user.name, user.id);
     res.cookie('token', tokenResult.access_token, {
       httpOnly: true,
       maxAge: 0,
-      domain: this.configService.get("serverConfig.url"),
+      domain: this.configService.get('serverConfig.url'),
     });
-    return res.status(200).json({status: 200, message: 'ok'}).send();
+    return res.status(200).json({ status: 200, message: 'ok' });
   }
 
-
-
-
-  /// 클라이언트의 쿠키가 올바른지 확인용 (개발용)
-  @Get('/token')
+  @Post('two-factor')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(TokenInterceptor)
-  checkToken(): AuthResponseDto {
-    return { status: 200, message: 'OK' };
+  async checkTwoFactor(@Req() req, @Body() body) {
+    await this.userService.checkTwoFactor(req.user, body.code);
   }
 
-  /// 테스트 계정인 "name1"에 대한 토큰 발급용.
-  @Get('/test')
+  @Patch('two-factor')
+  @UseGuards(JwtAuthGuard)
+  async updateTwoFactor(@Req() req, @Body() body) {
+    await this.userService.updateTwoFactor(req.user, body.code);
+  }
+
+  @Get('test/{userId}')
   @UseInterceptors(TokenInterceptor)
-  async testToken(@Req() req): Promise<any> {
-    const user: User = await this.userService.findUserByUsername('name1', true);
-
-    ///개발용이라 내부에서 throw 안햇습다
-    if (user == null) {
-      return {
-        status: 404,
-        message: 'init을 안하셨군요. 테스트하려면 /test/init부터...',
-      };
-    }
-
-    req.user = user;
-
-    return { status: 200, message: 'OK' };
+  async test(@Req() req, @Param() param) {
+    const userId = parseInt(param, 10);
+    req.user = await this.userService.findByUserId(userId);
   }
 }
