@@ -161,7 +161,10 @@ class ChatService {
 
   sendMessage(chatId: number, userId: number) {
     const chatSession = this.chatSession.get(chatId);
-    if (this.isControlledUser(chatSession.private.muted, userId))
+    if (
+      this.isControlledUser(chatSession.private.muted, userId) ||
+      chatSession.private.users.indexOf(userId) === -1
+    )
       throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
   }
 
@@ -217,19 +220,10 @@ class ChatService {
       throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
     }
 
-    const expiredAt = Date.now() + 5 * 60 * 1000;
-    const existUser: ChatControlledUserDto = chat.private[type].find(
-      (user: ChatControlledUserDto) => user.userId === targetId,
-    );
-
-    if (existUser) {
-      existUser.expiredAt = expiredAt;
-    } else {
-      chat.private[type].push({
-        userId: targetId,
-        expiredAt: expiredAt,
-      });
-    }
+    chat.private[type].push({
+      userId: targetId,
+      expiredAt: Date.now() + 20 * 1000,
+    });
   }
 }
 

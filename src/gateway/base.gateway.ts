@@ -122,6 +122,8 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.leave(client[type].room);
       client[type].id = undefined;
       client[type].room = undefined;
+      if (type !== IC_TYPE.USER) client[type].isOwner = false;
+      if (type === IC_TYPE.CHAT) client[type].isAdmin = false;
     };
   }
 

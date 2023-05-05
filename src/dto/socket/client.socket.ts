@@ -10,12 +10,9 @@ export class IdentityContiguration {
 export class ChatConfiguration extends IdentityContiguration {
   isAdmin: boolean;
   isOwner: boolean;
-  setAdmin = (flag: boolean) => (this.isAdmin = flag);
-  setOwner = (flag: boolean) => (this.isOwner = flag);
 }
 
 export class GameConfiguration extends IdentityContiguration {
-  setOwner = (flag: boolean) => (this.isOwner = flag);
   isOwner: boolean;
 }
 
