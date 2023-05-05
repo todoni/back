@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import BaseSession from '@session/base.session';
-import UserSessionDto from '@dto/user/user.session.dto';
+import UserSessionDto, { UserInfoDto } from '@dto/user/user.session.dto';
 
 @Injectable()
 class UserSession extends BaseSession<UserSessionDto> {
@@ -9,11 +9,22 @@ class UserSession extends BaseSession<UserSessionDto> {
     super();
   }
 
+  getUserInfo(userId: number): UserInfoDto {
+    const user = this.get(userId);
+    return {
+      userId: user.userId,
+      username: user.username,
+      state: user.state,
+      profile: user.profile,
+    };
+  }
+
   getAllUser() {
     return [...this.store.entries()].map(([_, userSessionDto]) => ({
       userId: userSessionDto.userId,
       username: userSessionDto.username,
       state: userSessionDto.state,
+      profile: userSessionDto.profile,
     }));
   }
 }

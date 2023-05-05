@@ -39,6 +39,16 @@ export class UserService {
       );
   }
 
+  getUserInfoForSocket(userId: number) {
+    return this.userSession.getUserInfo(userId);
+  }
+
+  checkUserOnline(userId: number) {
+    const user = this.userSession.get(userId, true);
+    if (user && user.state !== UserSocketState.OFFLINE)
+      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+  }
+
   async setUserForSocket(userId: number) {
     const user = await this.userRepository.findUser(userId);
     const friends = await this.friendRepository.findFriends(userId);
@@ -48,10 +58,15 @@ export class UserService {
       userId: userId,
       username: user.name,
       state: UserSocketState.ONLINE,
+      profile: user.profile,
       follows: friends.map((friend) => friend.sourceId),
       blocks: blocks.map((block) => block.sourceId),
       room: `room:user:${user.id}`,
     });
+  }
+
+  deleteUserForSocket(userId: number) {
+    this.userSession.delete(userId);
   }
 
   async findByUserId(userId: number): Promise<User> {

@@ -15,8 +15,8 @@ class BaseSession<T> {
     return this.store.size;
   }
 
-  public get(key: number): T {
-    if (!this.store.has(key))
+  public get(key: number, isRough = false): T {
+    if (!isRough && !this.store.has(key))
       throw new NotFoundException(ExceptionMessage.NOT_FOUND);
     return this.store.get(key);
   }

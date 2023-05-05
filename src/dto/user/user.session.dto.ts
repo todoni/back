@@ -4,6 +4,7 @@ export class UserInfoDto {
   userId: number;
   username: string;
   state: UserSocketState;
+  profile: string;
 }
 
 class UserSessionDto extends UserInfoDto {

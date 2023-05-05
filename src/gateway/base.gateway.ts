@@ -8,7 +8,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import {
-  ForbiddenException,
   HttpException,
   ParseIntPipe,
   UseFilters,
@@ -55,7 +54,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly imageService: ImageService,
   ) {}
 
-  handleConnection(client: ClientSocket) {
+  async handleConnection(client: ClientSocket) {
     this.initSocket(client);
 
     try {
@@ -63,11 +62,9 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const payload = this.authService.parseToken(cookie);
       const userId = parseInt(payload['id'], 10);
 
-      if (this.socketSession.has(userId))
-        throw new ForbiddenException(ExceptionMessage.UNAUTHORIZED);
-
+      this.userService.checkUserOnline(userId);
       client.set(IC_TYPE.USER, userId);
-      this.userService.setUserForSocket(userId);
+      await this.userService.setUserForSocket(userId);
       this.socketSession.set(userId, client);
       this.changeState(client, UserSocketState.ONLINE);
       client.emit('single:user:connect', {
@@ -76,6 +73,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
         gameList: this.gameService.getAllGame(),
       });
     } catch (err) {
+      console.log(err);
       const exception = SocketException.fromOptions({
         status: err instanceof HttpException ? err.getStatus() : 500,
         message:
@@ -93,16 +91,17 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (client.game.id) this.leaveGame(client);
 
     this.changeState(client, UserSocketState.OFFLINE);
+    this.userService.deleteUserForSocket(client.user.id);
     this.socketSession.delete(client.user.id);
     client.clear(IC_TYPE.USER);
   }
 
   changeState(client: ClientSocket, state: UserSocketState) {
     client.state = state;
-    this.server.emit('broadcast:user:changeState', {
-      userId: client.user.id,
-      state: client.state,
-    });
+    this.server.emit(
+      'broadcast:user:changeState',
+      this.userService.getUserInfoForSocket(client.user.id),
+    );
   }
 
   initSocket(client: ClientSocket) {
