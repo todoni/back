@@ -190,6 +190,10 @@ export class UserService {
     await this.blockRepository.blockUser(sourceId, targetId);
   }
 
+  async unBlockUser(sourceId: number, targetId: number) {
+    await this.blockRepository.unBlockUser(sourceId, targetId);
+  }
+
   async updateImage(userId: number, imageUrl: string) {
     await this.userRepository.updateImageUrl(userId, imageUrl);
   }

@@ -26,4 +26,15 @@ export default class BlockRepository extends Repository<Block> {
       })
       .execute();
   }
+
+  async unBlockUser(sourceId: number, targetId: number) {
+    await this.createQueryBuilder('blocks')
+      .delete()
+      .from(Block)
+      .where('blocks.source_id = :sourceId and blocks.target_id = :targetId', {
+        sourceId: sourceId,
+        targetId: targetId,
+      })
+      .execute();
+  }
 }

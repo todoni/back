@@ -415,6 +415,16 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.emit('single:user:blockUser', { userId: userId });
   }
 
+  @UseInterceptors(new SocketValidationInterceptor('userId'))
+  @SubscribeMessage('unBlockUser')
+  async unBlockUser(
+    @ConnectedSocket() client: ClientSocket,
+    @MessageBody('userId', ParseIntPipe) userId: number,
+  ) {
+    await this.userService.unBlockUser(client.user.id, userId);
+    client.emit('single:user:unBlockUser', { userId: userId });
+  }
+
   /* ============================ */
   /*             Game             */
   /* ============================ */
