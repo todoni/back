@@ -138,8 +138,11 @@ export class UserService {
     const userAchievementList =
       await this.userAchievementRepository.findUserAchievement(userId);
 
-    const user = userList.find((e) => e.id === userId);
-
+    console.log('userId: ', userId);
+    console.log('userList: ', userList);
+    console.log('userId type: ', typeof +userId);
+    console.log('userList id type: ', typeof userList[0].id);
+    const user = userList.find((e) => e.id === +userId);
     const result: UserDetailDto = UserDetailDto.fromData(
       user,
       userList,
