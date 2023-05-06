@@ -30,14 +30,14 @@ class GameService {
     return this.gameSession.get(gameId);
   }
 
-  createGame(userId: number, speed: number) {
+  createGame(userId: number, speed: number, name?: string) {
     const gameSession = new GameSessionDto();
     const gamePlayer = new GamePlayerDto();
     const gameId = this.gameSession.getNextSequence();
 
     gameSession.public.gameId = gameId;
     gameSession.public.ownerId = userId;
-    gameSession.public.name = `신나는 게임 한판`;
+    gameSession.public.name = name || `신나는 게임 한판`;
     gameSession.public.speed = speed;
     gameSession.private.room = `room:game:${gameId}`;
     gameSession.private.ball.speed = speed;

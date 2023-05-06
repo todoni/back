@@ -425,8 +425,13 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   createGame(
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('speed', ParseIntPipe) speed: number,
+    @MessageBody('name') name?: string,
   ) {
-    const gameSession = this.gameService.createGame(client.user.id, speed);
+    const gameSession = this.gameService.createGame(
+      client.user.id,
+      speed,
+      name,
+    );
     client.set(IC_TYPE.GAME, gameSession.public.gameId);
 
     this.changeState(client, UserSocketState.IN_GAME);
