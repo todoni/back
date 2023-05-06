@@ -9,10 +9,6 @@ export default class UserRepository extends Repository<User> {
   constructor(private readonly dataSource: DataSource) {
     super(User, dataSource.createEntityManager());
   }
-  async findAll(): Promise<User[]> {
-    const query = await this.createQueryBuilder('users').getMany();
-    return query;
-  }
 
   async findUser(userId: number): Promise<User | null> {
     const query = await this.createQueryBuilder('users')
