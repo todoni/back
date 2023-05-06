@@ -14,6 +14,7 @@ export class UserDto {
 }
 
 export class UserDetailDto {
+  id: number;
   name: string;
   nickname: string;
   twoFactor: string;
@@ -36,6 +37,7 @@ export class UserDetailDto {
     userAchievementList: UserAchievement[],
   ): UserDetailDto {
     const temp = new UserDetailDto();
+    temp.id = user.id;
     temp.name = user.name;
     temp.nickname = user.nickname;
     temp.twoFactor = user.twoFactor;
