@@ -68,7 +68,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.socketSession.set(userId, client);
       this.changeState(client, UserSocketState.ONLINE);
       client.emit('single:user:connect', {
-        userList: this.userService.getAllUserForSocket(userId),
+        userList: await this.userService.getAllUserForSocket(userId),
         chatList: this.chatService.getAllChat(),
         gameList: this.gameService.getAllGame(),
       });

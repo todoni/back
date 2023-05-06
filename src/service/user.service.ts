@@ -16,6 +16,7 @@ import UserSession from '@session/user.session';
 import UserSocketState from '@dto/user/user.socket.state';
 import EncryptionService from '@service/encryption.service';
 import ExceptionMessage from '@dto/socket/exception.message';
+import { UserInfoDto } from '@dto/user/user.session.dto';
 
 @Injectable()
 export class UserService {
@@ -29,14 +30,29 @@ export class UserService {
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  getAllUserForSocket(userId: number) {
-    return this.userSession
+  async getAllUserForSocket(userId: number): Promise<UserInfoDto[]> {
+    const sessionList = this.userSession
       .getAllUser()
       .filter(
         (userInfo) =>
           userInfo.userId !== userId &&
           userInfo.state !== UserSocketState.OFFLINE,
       );
+    const userList: User[] = (await this.userRepository.findAll()).filter(
+      (user) => user.id !== userId,
+    );
+    const userInfoList: UserInfoDto[] = userList.map((user) => {
+      const sessionUser = sessionList.find((e) => e.userId === user.id);
+      const state =
+        sessionUser !== undefined ? sessionUser.state : UserSocketState.OFFLINE;
+      return {
+        userId: user.id,
+        username: user.nickname,
+        state: state,
+        profile: user.profile,
+      };
+    });
+    return userInfoList;
   }
 
   getUserInfoForSocket(userId: number) {
