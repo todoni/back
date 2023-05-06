@@ -63,7 +63,7 @@ export class UserService {
 
     this.userSession.set(userId, {
       userId: userId,
-      username: user.name,
+      username: user.nickname,
       state: UserSocketState.ONLINE,
       profile: user.profile,
       follows: friends.map((friend) => friend.sourceId),
