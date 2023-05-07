@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import {
   HttpException,
+  HttpStatus,
   ParseIntPipe,
   UseFilters,
   UseInterceptors,
@@ -33,10 +34,16 @@ import SocketSession from '@session/socket.session';
 import { UserService } from '@service/user.service';
 import GameService from '@service/game.service';
 import ImageService from '@service/image.service';
-import GameSessionDto, { GamePlayerDto } from '@dto/game/game.session.dto';
+import GameSessionDto, {
+  GamePlayerDto,
+  GamePrivateDto,
+} from '@dto/game/game.session.dto';
 import { AuthService } from '@service/auth.service';
 import ExceptionMessage from '@dto/socket/exception.message';
 import SocketException from '@exception/socket.exception';
+import { GameAuthInterceptor } from '@interceptor/game.interceptor';
+import CreateGameDto from '@dto/game/create.game.dto';
+import ClientException from '@exception/client.exception';
 
 @WebSocketGateway(4000)
 @UseFilters(SocketGlobalFilter)
@@ -59,7 +66,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     try {
       const cookie = client.handshake.headers.cookie;
-      const payload = this.authService.parseToken(cookie);
+      const payload = await this.authService.parseToken(cookie);
       const userId = parseInt(payload['id'], 10);
 
       this.userService.checkUserOnline(userId);
@@ -91,10 +98,12 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (client.chat.id) this.leaveChat(client);
       if (client.game.id) this.leaveGame(client);
 
-      this.changeState(client, UserSocketState.OFFLINE);
-      this.userService.deleteUserForSocket(client.user.id);
-      this.socketSession.delete(client.user.id);
-      client.clear(IC_TYPE.USER);
+      if (client.user.id) {
+        this.changeState(client, UserSocketState.OFFLINE);
+        this.userService.deleteUserForSocket(client.user.id);
+        this.socketSession.delete(client.user.id);
+        client.clear(IC_TYPE.USER);
+      }
     } catch (err) {}
   }
 
@@ -124,6 +133,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client[type].room = undefined;
       if (type !== IC_TYPE.USER) client[type].isOwner = false;
       if (type === IC_TYPE.CHAT) client[type].isAdmin = false;
+      if (type === IC_TYPE.GAME) client[type].isPlayer = false;
     };
   }
 
@@ -374,9 +384,11 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('image') image: string,
   ) {
-    const filename = `${client.user.id}`;
+    const sequence = await this.userService.getProfileSequence(client.user.id);
+    const filename = `${client.user.id}-${sequence}`;
     const imageUrl = await this.imageService.uploadImage(filename, image);
-    this.userService.updateImage(client.user.id, imageUrl);
+    await this.userService.updateImage(client.user.id, imageUrl);
+    await this.imageService.deleteImage(`${client.user.id}-${sequence - 1}`);
     this.server.emit('broadcast:user:updateImage', {
       userId: client.user.id,
       imageUrl: imageUrl,
@@ -431,32 +443,44 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* ==========  Broadcast  =========== */
 
+  @UseInterceptors(
+    new SocketValidationInterceptor('game'),
+    new GameAuthInterceptor({ hasGame: false }),
+  )
   @SubscribeMessage('createGame')
   createGame(
     @ConnectedSocket() client: ClientSocket,
-    @MessageBody('speed', ParseIntPipe) speed: number,
-    @MessageBody('name') name?: string,
+    @MessageBody('game') game: CreateGameDto,
   ) {
     const gameSession = this.gameService.createGame(
       client.user.id,
-      speed,
-      name,
+      game.speed,
+      {
+        name: game.name,
+        username: this.userService.getUsernameForSocket(client.user.id),
+      },
     );
+    this.gameService.setPlayer(client, true);
     client.set(IC_TYPE.GAME, gameSession.public.gameId);
 
     this.changeState(client, UserSocketState.IN_GAME);
     this.server.emit('broadcast:game:createGame', gameSession.public);
-    client.emit('single:game:createGame', gameSession);
+    client.emit('single:game:joinGame', gameSession);
   }
 
   /* ==========  Group  =========== */
 
+  @UseInterceptors(
+    new SocketValidationInterceptor('gameId'),
+    new GameAuthInterceptor({ hasGame: false }),
+  )
   @SubscribeMessage('joinGame')
   joinGame(
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('gameId', ParseIntPipe) gameId: number,
   ) {
     const gameSession = this.gameService.joinGame(gameId, client.user.id);
+    this.gameService.setPlayer(client);
     client.set(IC_TYPE.GAME, gameId);
 
     this.changeState(client, UserSocketState.IN_GAME);
@@ -464,9 +488,39 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .to(client.game.room)
       .except(client.user.room)
       .emit('group:game:joinGame', gameSession.private.players[1]);
+
     client.emit('single:game:joinGame', gameSession);
   }
 
+  @UseInterceptors(new GameAuthInterceptor({ hasGame: false }))
+  @SubscribeMessage('quickGame')
+  quickGame(@ConnectedSocket() client: ClientSocket) {
+    const gameState = this.gameService.quickGame(
+      client.user.id,
+      this.userService.getUsernameForSocket(client.user.id),
+    );
+    this.gameService.setPlayer(client, true);
+    client.set(IC_TYPE.GAME, gameState.gameSession.public.gameId);
+    this.changeState(client, UserSocketState.IN_GAME);
+
+    if (gameState.isCreated) {
+      this.server.emit(
+        'broadcast:game:createGame',
+        gameState.gameSession.public,
+      );
+    } else {
+      this.server
+        .to(client.game.room)
+        .except(client.user.room)
+        .emit('group:game:joinGame', gameState.gameSession.private.players[1]);
+    }
+    client.emit('single:game:joinGame', gameState.gameSession);
+  }
+
+  @UseInterceptors(
+    new SocketValidationInterceptor('gameId'),
+    new GameAuthInterceptor({ hasGame: false }),
+  )
   @SubscribeMessage('watchGame')
   watchGame(
     @ConnectedSocket() client: ClientSocket,
@@ -482,27 +536,47 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.emit('single:game:watchGame', gameSession);
   }
 
+  @UseInterceptors(new GameAuthInterceptor())
   @SubscribeMessage('leaveGame')
   leaveGame(@ConnectedSocket() client: ClientSocket) {
-    const isOwner = this.gameService.leaveGame(client.game.id, client.user.id);
+    const gameState = this.gameService.leaveGame(
+      client.game.id,
+      client.user.id,
+    );
 
     this.changeState(client, UserSocketState.ONLINE);
-    if (isOwner) {
+    if (gameState.isOwner) {
       this.server.emit('broadcast:game:deleteGame', { gameId: client.game.id });
-    } else {
       this.server
-        .to(client.game.room)
-        .emit('group:game:leaveGame', { userId: client.user.id });
+        .to(
+          gameState.existUsers.map((userId) => {
+            const session = this.socketSession.get(userId);
+            session.clear(IC_TYPE.GAME);
+            return `room:user:${userId}`;
+          }),
+        )
+        .emit('single:game:leaveGame');
+    } else {
+      this.server.to(client.game.room).emit('group:game:leaveGame', {
+        userId: client.user.id,
+        breakGame: gameState.breakGame,
+      });
     }
     client.clear(IC_TYPE.GAME);
-    client.emit('single:chat:leaveGame');
+    client.emit('single:game:leaveGame');
   }
 
+  @UseInterceptors(new GameAuthInterceptor({ owner: true }))
   @SubscribeMessage('startGame')
   startGame(@ConnectedSocket() client: ClientSocket) {
     const gameSession = this.gameService.get(client.game.id);
 
-    this.changePlayerState(gameSession.private.players);
+    if (gameSession.private.players.length !== 2)
+      throw new ClientException(
+        ExceptionMessage.GAME_START_ERROR,
+        HttpStatus.BAD_REQUEST,
+      );
+
     this.server.to(client.game.room).emit('group:game:startGame');
 
     this.gameService.initialGameSetting(gameSession);
@@ -511,8 +585,9 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
         !this.gameService.monitGame(gameSession.private) ||
         !gameSession.private.onGame
       ) {
+        console.log('endGame');
         clearInterval(gameSession.private.gameInterval);
-        const gameReult = this.gameService.endGame(gameSession.private.players);
+        const gameReult = this.gameService.endGame(gameSession.private);
         this.server.to(client.game.room).emit('group:game:endGame', {
           winner: gameReult.winner,
           loser: gameReult.loser,
@@ -524,6 +599,10 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }, 100);
   }
 
+  @UseInterceptors(
+    new SocketValidationInterceptor('keyCode'),
+    new GameAuthInterceptor({ player: true }),
+  )
   @SubscribeMessage('movePaddle')
   moveBall(
     @ConnectedSocket() client: ClientSocket,
@@ -545,8 +624,15 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* ==========  Single  =========== */
 
+  @UseInterceptors(
+    new SocketValidationInterceptor('userId'),
+    new GameAuthInterceptor(),
+  )
   @SubscribeMessage('inviteGame')
-  inviteGame(@ConnectedSocket() client: ClientSocket) {}
+  inviteGame(
+    @ConnectedSocket() client: ClientSocket,
+    @MessageBody('userId', ParseIntPipe) userId: number,
+  ) {}
 
   /* =============================== */
   /*             Private             */
@@ -559,7 +645,12 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       ball: gameSession.private.ball,
     });
 
-    await this.waitAsync(3, this.countDownRound, gameSession.private.room);
+    await this.waitAsync(
+      this.server,
+      3,
+      this.countDownRound,
+      gameSession.private.room,
+    );
 
     this.server.to(gameSession.private.room).emit('group:game:startRound');
     gameSession.private.roundInterval = setInterval(() => {
@@ -573,10 +664,13 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
         gameSession.private.ball,
         gameSession.private.players,
       );
+      console.log(gameSession.private.ball);
       this.server.to(gameSession.private.room).emit('group:game:moveBall', {
         position: gameSession.private.ball.position,
       });
-    }, 1000 / gameSession.private.ball.speed);
+      // todo: 나중에 다시 조져봐야 함
+    }, 1000 / 10);
+    // }, 1000 / gameSession.private.ball.speed);
   }
 
   endRound(gameSession: GameSessionDto) {
@@ -584,18 +678,17 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(gameSession.private.room).emit('group:game:endRound');
   }
 
-  countDownRound(count: number, room: string) {
-    this.server.to(room).emit('group:game:coundDownRound', { count: count });
+  countDownRound(server: Server, count: number, room: string) {
+    console.log(`>> ${count}`);
+    server.to(room).emit('group:game:coundDownRound', { count: count });
   }
 
-  changePlayerState(players: GamePlayerDto[]) {
-    players.forEach((player) => {
-      const playerSocket = this.socketSession.get(player.userId);
-      this.changeState(playerSocket, UserSocketState.IN_GAME);
-    });
-  }
-
-  async waitAsync(condition: number, callback: Function, ...args: any) {
+  async waitAsync(
+    server: Server,
+    condition: number,
+    callback: Function,
+    ...args: any
+  ) {
     return await new Promise((resolve) => {
       const interval = setInterval(() => {
         if (!condition) {
@@ -603,7 +696,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
           resolve(undefined);
           return;
         }
-        callback(condition, ...args);
+        callback(server, condition, ...args);
         condition--;
       }, 1000);
     });

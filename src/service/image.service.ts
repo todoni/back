@@ -32,6 +32,15 @@ class ImageService {
       .promise();
     return result.Location;
   }
+
+  async deleteImage(filename: string) {
+    await this.s3
+      .deleteObject({
+        Bucket: this.configService.get('awsConfig.bucket'),
+        Key: filename,
+      })
+      .promise();
+  }
 }
 
 export default ImageService;

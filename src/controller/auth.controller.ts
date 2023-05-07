@@ -42,6 +42,7 @@ export class AuthController {
     const user: User = req.user;
     if (!user.twoFactor)
       return { status: 302, message: 'OK', redirectPath: 'lobby' };
+    // todo: two-factor 페이지 구현되면, redirectPath 설정
     else return { status: 200, message: '2단계 인증 필요', twoFactor: true };
   }
 

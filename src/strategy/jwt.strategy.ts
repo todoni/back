@@ -1,5 +1,5 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 
@@ -7,6 +7,7 @@ import { User } from '@entity/user.entity';
 import { UserService } from '@service/user.service';
 import { AuthService } from '@service/auth.service';
 import ExceptionMessage from '@dto/socket/exception.message';
+import ClientException from '@exception/client.exception';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -30,7 +31,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       if (req['firstAccess'] === true) {
         await this.authService.expireFirstAccess(req['id']);
       }
-      throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED);
+      throw new ClientException(
+        ExceptionMessage.UNAUTHORIZED,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     const user = await this.userService.findByUserId(req['id']);

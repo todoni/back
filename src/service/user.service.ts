@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 
 import { UserDetailDto, UserDto } from '@dto/user/user.dto';
 import { User } from '@entity/user.entity';
@@ -16,6 +11,7 @@ import UserSession from '@session/user.session';
 import UserSocketState from '@dto/user/user.socket.state';
 import EncryptionService from '@service/encryption.service';
 import ExceptionMessage from '@dto/socket/exception.message';
+import ClientException from '@exception/client.exception';
 
 @Injectable()
 export class UserService {
@@ -28,6 +24,10 @@ export class UserService {
     private readonly userAchievementRepository: UserAchievementRepository,
     private readonly encryptionService: EncryptionService,
   ) {}
+
+  getUsernameForSocket(userId: number) {
+    return this.userSession.get(userId).username;
+  }
 
   getAllUserForSocket(userId: number) {
     return this.userSession
@@ -46,7 +46,10 @@ export class UserService {
   checkUserOnline(userId: number) {
     const user = this.userSession.get(userId, true);
     if (user && user.state !== UserSocketState.OFFLINE)
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ClientException(
+        ExceptionMessage.FORBIDDEN,
+        HttpStatus.FORBIDDEN,
+      );
   }
 
   setStateForSocket(userId: number, state: UserSocketState) {
@@ -59,7 +62,11 @@ export class UserService {
     const friends = await this.friendRepository.findFriends(userId);
     const blocks = await this.blockRepository.findBlocks(userId);
 
-    if (!user) throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED);
+    if (!user)
+      throw new ClientException(
+        ExceptionMessage.UNAUTHORIZED,
+        HttpStatus.UNAUTHORIZED,
+      );
 
     this.userSession.set(userId, {
       userId: userId,
@@ -79,7 +86,10 @@ export class UserService {
   async findByUserId(userId: number): Promise<User> {
     const result = await this.userRepository.findUser(userId);
     if (result == null) {
-      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
+      throw new ClientException(
+        ExceptionMessage.NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
     return result;
   }
@@ -90,7 +100,10 @@ export class UserService {
   ): Promise<User | null> {
     const result = await this.userRepository.findUserByName(username);
     if (isTest == false && result == null) {
-      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
+      throw new ClientException(
+        ExceptionMessage.NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
     return result;
   }
@@ -124,7 +137,10 @@ export class UserService {
     );
 
     if (user == null) {
-      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
+      throw new ClientException(
+        ExceptionMessage.NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return result;
@@ -149,21 +165,21 @@ export class UserService {
     );
 
     if (user == null) {
-      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
+      throw new ClientException(
+        ExceptionMessage.NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return result;
   }
 
-  async hasNickname(nickname: string): Promise<boolean | null> {
-    const userList = await this.userRepository.find();
-    if (userList.some((e) => e.nickname === nickname)) return true;
-    return false;
-  }
-
   async firstAccess(user: User) {
     if (!user.firstAccess)
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ClientException(
+        ExceptionMessage.FORBIDDEN,
+        HttpStatus.FORBIDDEN,
+      );
 
     user.firstAccess = false;
 
@@ -194,20 +210,37 @@ export class UserService {
     await this.blockRepository.unBlockUser(sourceId, targetId);
   }
 
+  async getProfileSequence(userId: number) {
+    const user = await this.userRepository.findUser(userId);
+    if (user.profile.indexOf('cdn.intra.42.fr') !== -1) return 1;
+
+    const sequence = parseInt(user.profile.split('com/')[1].split('-')[1], 10);
+
+    if (!sequence || isNaN(sequence)) return 1;
+    return sequence + 1;
+  }
+
   async updateImage(userId: number, imageUrl: string) {
     await this.userRepository.updateImageUrl(userId, imageUrl);
   }
 
-  async checkTwoFactor(user: User, code: string) {
-    if (!(await this.encryptionService.compare(code, user.twoFactor)))
-      throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED);
+  async checkTwoFactor(user: User, code: number) {
+    if (!user.twoFactor)
+      throw new ClientException(
+        ExceptionMessage.NOT_FOUND,
+        HttpStatus.BAD_REQUEST,
+      );
+    if (!(await this.encryptionService.compare(String(code), user.twoFactor)))
+      throw new ClientException(
+        ExceptionMessage.UNAUTHORIZED,
+        HttpStatus.UNAUTHORIZED,
+      );
   }
 
-  async updateTwoFactor(user: User, code: string) {
-    const password = !code.length
+  async updateTwoFactor(user: User, code?: number) {
+    const password = !code
       ? null
-      : await this.encryptionService.hash(code);
-    user.twoFactor = password;
-    this.userRepository.save(user);
+      : await this.encryptionService.hash(String(code));
+    await this.userRepository.updateTwoFactor(user.id, password);
   }
 }

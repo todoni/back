@@ -2,12 +2,13 @@ import {
   PipeTransform,
   Injectable,
   ArgumentMetadata,
-  BadRequestException,
+  HttpStatus,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
 import ExceptionMessage from '@dto/socket/exception.message';
+import ClientException from '@exception/client.exception';
 
 @Injectable()
 export class ValidationPipe implements PipeTransform {
@@ -18,7 +19,10 @@ export class ValidationPipe implements PipeTransform {
     const object = plainToInstance(metadata.metatype, value);
     const errors = await validate(object);
     if (errors.length > 0) {
-      throw new BadRequestException(ExceptionMessage.MISSING_PARAM);
+      throw new ClientException(
+        ExceptionMessage.MISSING_PARAM,
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return value;
   }

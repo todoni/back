@@ -32,6 +32,13 @@ export default class UserRepository extends Repository<User> {
     return query;
   }
 
+  async findUserByNickname(name: string): Promise<User | null> {
+    const query = await this.createQueryBuilder('users')
+      .where('users.nickname = :nickname', { nickname: name })
+      .getOne();
+    return query;
+  }
+
   async updateFirstAccess(user: User) {
     await this.createQueryBuilder('users')
       .update(user)
@@ -51,6 +58,14 @@ export default class UserRepository extends Repository<User> {
     await this.createQueryBuilder('users')
       .update()
       .set({ profile: imageUrl })
+      .where('users.id = :userId', { userId: userId })
+      .execute();
+  }
+
+  async updateTwoFactor(userId: number, twoFactor: string) {
+    await this.createQueryBuilder('users')
+      .update()
+      .set({ twoFactor: twoFactor })
       .where('users.id = :userId', { userId: userId })
       .execute();
   }

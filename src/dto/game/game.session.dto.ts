@@ -20,7 +20,8 @@ export class GamePublicDto {
 
 export class GamePrivateDto {
   room: string;
-  players: GamePlayerDto[] = new Array(2);
+  players: GamePlayerDto[] = [];
+  playerTempList: GamePlayerDto[] = [];
   watcher: number[] = [];
   ball: GameBallDto = new GameBallDto();
   totalScore: number = 11;

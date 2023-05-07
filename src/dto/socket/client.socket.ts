@@ -14,6 +14,7 @@ export class ChatConfiguration extends IdentityContiguration {
 
 export class GameConfiguration extends IdentityContiguration {
   isOwner: boolean;
+  isPlayer: boolean;
 }
 
 export enum IC_TYPE {

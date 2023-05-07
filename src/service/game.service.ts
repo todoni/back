@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 
 import GameSession from '@session/game.session';
 import GameSessionDto, {
@@ -7,6 +7,8 @@ import GameSessionDto, {
   GamePrivateDto,
 } from '@dto/game/game.session.dto';
 import ExceptionMessage from '@dto/socket/exception.message';
+import ClientSocket from '@dto/socket/client.socket';
+import ClientException from '@exception/client.exception';
 
 @Injectable()
 class GameService {
@@ -30,14 +32,23 @@ class GameService {
     return this.gameSession.get(gameId);
   }
 
-  createGame(userId: number, speed: number, name?: string) {
+  setPlayer(client: ClientSocket, alsoOwner = false) {
+    client.game.isPlayer = true;
+    if (alsoOwner) client.game.isOwner = true;
+  }
+
+  createGame(
+    userId: number,
+    speed: number,
+    options?: { name?: string; username?: string },
+  ) {
     const gameSession = new GameSessionDto();
     const gamePlayer = new GamePlayerDto();
     const gameId = this.gameSession.getNextSequence();
 
     gameSession.public.gameId = gameId;
     gameSession.public.ownerId = userId;
-    gameSession.public.name = name || `신나는 게임 한판`;
+    gameSession.public.name = options.name || `${options.username}의 게임방`;
     gameSession.public.speed = speed;
     gameSession.private.room = `room:game:${gameId}`;
     gameSession.private.ball.speed = speed;
@@ -55,7 +66,10 @@ class GameService {
     const gamePlayer = new GamePlayerDto();
 
     if (gameSession.private.players.length === 2)
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ClientException(
+        ExceptionMessage.FORBIDDEN,
+        HttpStatus.FORBIDDEN,
+      );
 
     gamePlayer.userId = userId;
     gamePlayer.position = this.paddle.map((x) => (x + 1) * this.colSize + -2);
@@ -64,20 +78,49 @@ class GameService {
     return gameSession;
   }
 
+  quickGame(userId: number, username: string) {
+    const allGame = this.gameSession.getAllGame();
+    const randIdx = Math.floor(Math.random() * allGame.length);
+
+    // todo: speed 변경해야 함
+    return {
+      isCreated: allGame.length === 0,
+      gameSession: !allGame.length
+        ? this.createGame(userId, 100, { username: username })
+        : this.joinGame(allGame[randIdx].gameId, userId),
+    };
+  }
+
   leaveGame(gameId: number, userId: number) {
     const gameSession = this.gameSession.get(gameId);
     const isOwner = gameSession.public.ownerId === userId;
     const isWatcher = gameSession.private.watcher.indexOf(userId);
+    const existUsers: number[] = [];
 
-    if (isOwner) this.gameSession.delete(gameId);
-    else if (isWatcher !== -1) gameSession.private.watcher.splice(isWatcher, 1);
+    if (isOwner) {
+      gameSession.private.players.forEach(
+        (player) => player.userId !== userId && existUsers.push(player.userId),
+      );
+      gameSession.private.watcher.forEach((userId) => existUsers.push(userId));
+      this.gameSession.delete(gameId);
+    } else if (isWatcher !== -1)
+      gameSession.private.watcher.splice(isWatcher, 1);
     else gameSession.private.players.splice(1, 1);
 
-    return isOwner;
+    return {
+      isOwner: isOwner,
+      breakGame: gameSession.private.onGame && isWatcher === 1,
+      existUsers: existUsers,
+    };
   }
 
   waitGame(gameId: number, userId: number) {
     const gameSession = this.gameSession.get(gameId);
+    if (gameSession.private.onGame)
+      throw new ClientException(
+        ExceptionMessage.GAME_STARTED,
+        HttpStatus.FORBIDDEN,
+      );
     gameSession.private.watcher.push(userId);
     return gameSession;
   }
@@ -88,6 +131,10 @@ class GameService {
   }
 
   initialGameSetting(gameSession: GameSessionDto) {
+    gameSession.private.onGame = true;
+    gameSession.private.players.map((player) => {
+      player.score = 0;
+    });
     this.initialRoundSetting(gameSession.private, true);
   }
 
@@ -96,9 +143,10 @@ class GameService {
     const rand = Math.floor(Math.random() * 4);
     const deltaX = [1, -1, 1, -1];
     const deltaY = [-1, 1, 1, -1];
-
+    console.log(Math.round((this.colSize * this.rowSize) / 2) + 10);
     gamePrivate.onRound = !init;
-    gamePrivate.ball.position = Math.round((10 * 20) / 2) + 10;
+    gamePrivate.ball.position =
+      Math.round((this.colSize * this.rowSize) / 2) + 10;
     gamePrivate.ball.deltaX = -1 * deltaX[rand];
     gamePrivate.ball.deltaY = -this.colSize * deltaY[rand];
     gamePrivate.players.map((player, idx) => {
@@ -131,7 +179,31 @@ class GameService {
     );
   }
 
-  isBallTouchingPaddle(
+  isBallTouchingPaddleX(
+    position: number,
+    ball: GameBallDto,
+    players: GamePlayerDto[],
+  ) {
+    return (
+      players.findIndex(
+        (player) => player.position.indexOf(position + ball.deltaX) !== -1,
+      ) !== -1
+    );
+  }
+
+  isBallTouchingPaddleY(
+    position: number,
+    ball: GameBallDto,
+    players: GamePlayerDto[],
+  ) {
+    return (
+      players.findIndex(
+        (player) => player.position.indexOf(position + ball.deltaY) !== -1,
+      ) !== -1
+    );
+  }
+
+  isBallTouchingPaddleEdge(
     position: number,
     ball: GameBallDto,
     players: GamePlayerDto[],
@@ -139,18 +211,8 @@ class GameService {
     return (
       players.findIndex(
         (player) =>
-          player.position.indexOf(position) !== -1 ||
-          (ball.deltaX === -1 &&
-            player.position.indexOf(position + ball.deltaX) !== -1),
-      ) !== -1
-    );
-  }
-
-  isBallTouchingPaddleEdge(position: number, players: GamePlayerDto[]) {
-    return (
-      players.findIndex(
-        (player) =>
-          player.position[0] === position || player.position[2] === position,
+          player.position[0] === position + ball.deltaX + ball.deltaY ||
+          player.position[2] === position + ball.deltaX + ball.deltaY,
       ) !== -1
     );
   }
@@ -161,12 +223,18 @@ class GameService {
     if (this.isBallTouchingEdge(newPosition)) {
       ball.deltaY *= -1;
     }
-    if (this.isBallTouchingPaddle(newPosition, ball, players)) {
+    if (this.isBallTouchingPaddleX(newPosition, ball, players)) {
       ball.deltaX *= -1;
     }
-    if (this.isBallTouchingPaddleEdge(newPosition, players)) {
+    if (this.isBallTouchingPaddleY(newPosition, ball, players)) {
       ball.deltaY *= -1;
     }
+    if (this.isBallTouchingPaddleEdge(newPosition, ball, players)) {
+      ball.deltaX *= -1;
+      ball.deltaY *= -1;
+    }
+
+    ball.position = newPosition;
   }
 
   movePaddle(gameId: number, userId: number, keyCode: number) {
@@ -176,7 +244,10 @@ class GameService {
     );
 
     if (playerIndex === -1)
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ClientException(
+        ExceptionMessage.FORBIDDEN,
+        HttpStatus.FORBIDDEN,
+      );
     const player = gameSession.private.players[playerIndex];
     const edge =
       keyCode === this.upKey ? player.position[0] : player.position[2];
@@ -200,16 +271,17 @@ class GameService {
   }
 
   endRound(gamePrivate: GamePrivateDto) {
-    if (gamePrivate.ball.deltaX !== -1) {
+    if (gamePrivate.players[0] && gamePrivate.ball.deltaX !== -1) {
       gamePrivate.players[0].score++;
-    } else {
+    } else if (gamePrivate.players[1] && gamePrivate.ball.deltaX !== 1) {
       gamePrivate.players[1].score++;
     }
     gamePrivate.onRound = false;
   }
 
-  endGame(players: GamePlayerDto[]) {
-    const sortedPlayer = players.sort((a, b) => b.score - a.score);
+  endGame(gamePrivate: GamePrivateDto) {
+    const sortedPlayer = gamePrivate.players.sort((a, b) => b.score - a.score);
+    gamePrivate.onGame = false;
     return {
       winner: sortedPlayer[0],
       loser: sortedPlayer[1],

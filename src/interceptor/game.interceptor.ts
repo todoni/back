@@ -10,20 +10,20 @@ import ClientSocket from '@dto/socket/client.socket';
 import ExceptionMessage from '@dto/socket/exception.message';
 import ClientException from '@exception/client.exception';
 
-interface ChatAuthInterceptorParam {
-  hasChat?: boolean;
-  admin?: boolean;
+interface GameAuthInterceptorParam {
+  hasGame?: boolean;
   owner?: boolean;
+  player?: boolean;
 }
 
-export class ChatAuthInterceptor implements NestInterceptor {
-  private readonly hasChat: boolean;
-  private readonly admin: boolean;
+// todo: player 권한 조조회회
+export class GameAuthInterceptor implements NestInterceptor {
+  private readonly hasGame: boolean;
   private readonly owner: boolean;
+  private readonly player: boolean;
 
-  constructor(param: ChatAuthInterceptorParam = {}) {
-    this.hasChat = param.hasChat !== undefined ? param.hasChat : true;
-    this.admin = param.admin !== undefined ? param.admin : false;
+  constructor(param: GameAuthInterceptorParam = {}) {
+    this.hasGame = param.hasGame !== undefined ? param.hasGame : true;
     this.owner = param.owner !== undefined ? param.owner : false;
   }
 
@@ -34,9 +34,8 @@ export class ChatAuthInterceptor implements NestInterceptor {
     const client: ClientSocket = context.switchToWs().getClient();
 
     if (
-      (this.hasChat && !client.chat.id) ||
-      (!this.hasChat && client.chat.id) ||
-      client.game.id
+      (this.hasGame && !client.game.id) ||
+      (!this.hasGame && client.game.id)
     ) {
       throw new ClientException(
         ExceptionMessage.FORBIDDEN,
@@ -45,9 +44,9 @@ export class ChatAuthInterceptor implements NestInterceptor {
     }
 
     if (
-      this.hasChat &&
-      ((this.admin && !client.chat.isAdmin && !client.chat.isOwner) ||
-        (this.owner && !client.chat.isOwner))
+      this.hasGame &&
+      ((this.owner && !client.game.isOwner) ||
+        (this.player && !client.game.isPlayer))
     ) {
       throw new ClientException(
         ExceptionMessage.FORBIDDEN,

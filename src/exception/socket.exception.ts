@@ -1,6 +1,7 @@
 interface ExceptionParams {
   status: number;
   message: string;
+  navigate?: string;
   event?: string;
   stack?: string;
 }
@@ -8,6 +9,7 @@ interface ExceptionParams {
 class SocketException {
   status: number;
   message: string;
+  navigate?: string;
   event?: string;
 
   constructor(options: ExceptionParams) {

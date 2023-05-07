@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 
 import ChatSession from '@session/chat.session';
 import CreateChatDto from '@dto/chat/create.chat.dto';
@@ -15,6 +10,7 @@ import ChatType from '@dto/chat/chat.type';
 import EncryptionService from '@service/encryption.service';
 import ClientSocket from '@dto/socket/client.socket';
 import ExceptionMessage from '@dto/socket/exception.message';
+import ClientException from '@exception/client.exception';
 
 @Injectable()
 class ChatService {
@@ -48,7 +44,10 @@ class ChatService {
 
     if (createChatDto.type === ChatType.PROTECTED) {
       if (!createChatDto.password || !createChatDto.password.length)
-        throw new BadRequestException(ExceptionMessage.MISSING_PARAM);
+        throw new ClientException(
+          ExceptionMessage.MISSING_PARAM,
+          HttpStatus.BAD_REQUEST,
+        );
       chatSession.private.password = await this.encryptionService.hash(
         createChatDto.password,
       );
@@ -112,7 +111,10 @@ class ChatService {
           chatSession.public.type === ChatType.PRIVATE)) ||
       this.isControlledUser(chatSession.private.kicked, userId)
     ) {
-      throw new ForbiddenException();
+      throw new ClientException(
+        ExceptionMessage.FORBIDDEN,
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const invitedIndex = chatSession.private.invited.indexOf(userId);
@@ -165,7 +167,10 @@ class ChatService {
       this.isControlledUser(chatSession.private.muted, userId) ||
       chatSession.private.users.indexOf(userId) === -1
     )
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ClientException(
+        ExceptionMessage.FORBIDDEN,
+        HttpStatus.FORBIDDEN,
+      );
   }
 
   kickUser(chatId: number, sourceId: number, targetId: number) {
@@ -201,7 +206,10 @@ class ChatService {
   private changeAdmin(chatSession: ChatSessionDto, userId?: number) {
     const adminId = userId ? userId : chatSession.public.ownerId;
     if (chatSession.private.users.indexOf(adminId) === -1)
-      throw new NotFoundException(ExceptionMessage.NOT_FOUND);
+      throw new ClientException(
+        ExceptionMessage.NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     chatSession.public.adminId = adminId;
     return adminId;
   }
@@ -217,7 +225,10 @@ class ChatService {
       (sourceId !== chat.public.ownerId && targetId === chat.public.ownerId) ||
       chat.private.users.indexOf(targetId) === -1
     ) {
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ClientException(
+        ExceptionMessage.FORBIDDEN,
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     chat.private[type].push({

@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from '@service/user.service';
 import ExceptionMessage from '@dto/socket/exception.message';
+import ClientException from '@exception/client.exception';
 
 @Injectable()
 export class AuthService {
@@ -13,9 +14,12 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  parseToken(cookies: string) {
+  async parseToken(cookies: string) {
     if (!cookies)
-      throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED);
+      throw new ClientException(
+        ExceptionMessage.UNAUTHORIZED,
+        HttpStatus.UNAUTHORIZED,
+      );
 
     const token = cookies
       .split('; ')
@@ -24,9 +28,16 @@ export class AuthService {
         if (key === 'token') return true;
       })
       .split('=')[1];
-    this.jwtService.verify(token, {
-      secret: this.configService.get('authConfig.jwt'),
-    });
+    await this.jwtService
+      .verifyAsync(token, {
+        secret: this.configService.get('authConfig.jwt'),
+      })
+      .catch(() => {
+        throw new ClientException(
+          ExceptionMessage.UNAUTHORIZED,
+          HttpStatus.UNAUTHORIZED,
+        );
+      });
 
     return this.decodeToken(token);
   }

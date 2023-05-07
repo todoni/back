@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common';
 
 import { JwtAuthGuard } from '@src/guard/jwt.guard';
 import { UserDetailDto } from '@dto/user/user.dto';
@@ -20,15 +20,5 @@ export class UserController {
   async getUserDetailById(@Param('id') id: number): Promise<object> {
     const user: UserDetailDto = await this.userService.getUserDetailById(id);
     return user;
-  }
-
-  @Get('nickname')
-  @UseGuards(JwtAuthGuard)
-  async checkSameNick(@Query('name') name: string): Promise<object> {
-    const hasNick: boolean = await this.userService.hasNickname(name);
-    if (hasNick) {
-      return { status: 400, message: 'Already has nick ' + name };
-    }
-    return { status: 200, message: 'You can use nick ' + name };
   }
 }

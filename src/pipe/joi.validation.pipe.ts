@@ -2,9 +2,11 @@ import {
   PipeTransform,
   Injectable,
   ArgumentMetadata,
-  BadRequestException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ObjectSchema } from 'joi';
+
+import ClientException from '@exception/client.exception';
 
 @Injectable()
 export class JoiValidationPipe implements PipeTransform {
@@ -13,7 +15,7 @@ export class JoiValidationPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
     const { error } = this.schema.validate(value);
     if (error) {
-      throw new BadRequestException('Validation failed');
+      throw new ClientException('Validation failed', HttpStatus.BAD_REQUEST);
     }
     return value;
   }

@@ -14,10 +14,10 @@ export class User extends Common {
   @Column('varchar', { length: 20 })
   name: string;
 
-  @Column('varchar', { length: 20 })
+  @Column('varchar', { length: 20, unique: true })
   nickname: string;
 
-  @Column({ name: 'tw_factor', nullable: true })
+  @Column({ name: 'tw_factor', select: false, nullable: true })
   twoFactor: string;
 
   @Column('varchar', { length: 255 })
@@ -26,7 +26,12 @@ export class User extends Common {
   @Column({ name: 'first_access', default: false })
   firstAccess: boolean;
 
-  @Column('varchar', { name: 'refresh_token', length: 255, nullable: true })
+  @Column('varchar', {
+    name: 'refresh_token',
+    select: false,
+    length: 255,
+    nullable: true,
+  })
   refreshToken: string;
 
   //////////////////////////////////////////////
