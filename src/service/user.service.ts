@@ -182,7 +182,6 @@ export class UserService {
       );
 
     user.firstAccess = false;
-
     await this.userRepository.updateFirstAccess(user);
   }
 

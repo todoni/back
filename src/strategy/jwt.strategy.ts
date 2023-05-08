@@ -38,9 +38,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
 
     const user = await this.userService.findByUserId(req['id']);
-    if (user.firstAccess === true) {
-      await this.userService.firstAccess(user);
-    }
+    // if (user.firstAccess === true) {
+    //   await this.userService.firstAccess(user);
+    // }
 
     return user;
   }

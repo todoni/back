@@ -71,6 +71,12 @@ export class AuthController {
     await this.userService.updateTwoFactor(req.user, body.code);
   }
 
+  @Get('first-access')
+  @UseGuards(JwtAuthGuard)
+  async access(@Req() req) {
+    await this.authService.access(req.user);
+  }
+
   @Get('test/{userId}')
   @UseInterceptors(TokenInterceptor)
   async test(@Req() req, @Param() param) {

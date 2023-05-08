@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '@service/user.service';
 import ExceptionMessage from '@dto/socket/exception.message';
 import ClientException from '@exception/client.exception';
+import { User } from '@entity/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -45,6 +46,10 @@ export class AuthService {
   async getJwtToken(name: string, id: number) {
     const payload = { name: name, id: id };
     return { access_token: this.jwtService.sign(payload) };
+  }
+
+  async access(user: User) {
+    await this.userService.firstAccess(user);
   }
 
   decodeToken(token: string) {
