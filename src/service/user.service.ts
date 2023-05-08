@@ -223,23 +223,21 @@ export class UserService {
     await this.userRepository.updateImageUrl(userId, imageUrl);
   }
 
-  async checkTwoFactor(user: User, code: number) {
+  async checkTwoFactor(user: User, code: string) {
     if (!user.twoFactor)
       throw new ClientException(
         ExceptionMessage.NOT_FOUND,
         HttpStatus.BAD_REQUEST,
       );
-    if (!(await this.encryptionService.compare(String(code), user.twoFactor)))
+    if (!(await this.encryptionService.compare(code, user.twoFactor)))
       throw new ClientException(
         ExceptionMessage.UNAUTHORIZED,
         HttpStatus.UNAUTHORIZED,
       );
   }
 
-  async updateTwoFactor(user: User, code?: number) {
-    const password = !code
-      ? null
-      : await this.encryptionService.hash(String(code));
+  async updateTwoFactor(user: User, code?: string) {
+    const password = !code ? null : await this.encryptionService.hash(code);
     await this.userRepository.updateTwoFactor(user.id, password);
   }
 }
