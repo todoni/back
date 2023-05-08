@@ -17,7 +17,7 @@ export class User extends Common {
   @Column('varchar', { length: 20, unique: true })
   nickname: string;
 
-  @Column({ name: 'tw_factor', select: false, nullable: true })
+  @Column({ name: 'tw_factor', nullable: true })
   twoFactor: string;
 
   @Column('varchar', { length: 255 })
