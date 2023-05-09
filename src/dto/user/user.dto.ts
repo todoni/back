@@ -61,7 +61,7 @@ export class UserDetailDto {
       (gameLogList.filter((ele) => ele.winnerId === user.id).length /
         gameLogList.length) *
       100;
-    temp.userLogs = [];
+    temp.userLogs = gameLogList;
     temp.achivements = [];
 
     return temp;
@@ -69,11 +69,10 @@ export class UserDetailDto {
 }
 
 export class UserLog {
-  name: string;
-  nickname: string;
-  twoFactor: boolean;
-  twoFactorUid: string;
-  profile: string;
+  id: number;
+  winnerId: number;
+  looserId: number;
+  score: number;
 }
 
 export class UserAchievementDto {
