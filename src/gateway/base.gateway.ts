@@ -34,10 +34,7 @@ import SocketSession from '@session/socket.session';
 import { UserService } from '@service/user.service';
 import GameService from '@service/game.service';
 import ImageService from '@service/image.service';
-import GameSessionDto, {
-  GamePlayerDto,
-  GamePrivateDto,
-} from '@dto/game/game.session.dto';
+import GameSessionDto from '@dto/game/game.session.dto';
 import { AuthService } from '@service/auth.service';
 import ExceptionMessage from '@dto/socket/exception.message';
 import SocketException from '@exception/socket.exception';
@@ -67,7 +64,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const cookie = client.handshake.headers.cookie;
       const payload = await this.authService.parseToken(cookie);
-      const userId = parseInt(payload['id'], 10);
+      const userId = payload.id;
 
       this.userService.checkUserOnline(userId);
       client.set(IC_TYPE.USER, userId);
@@ -356,6 +353,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(`room:user:${userId}`).emit('single:chat:inviteUser', {
       chatId: client.chat.id,
       sourceId: client.user.id,
+      sourceUsername: this.userService.getUsernameForSocket(client.user.id),
     });
   }
 
@@ -632,7 +630,15 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   inviteGame(
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('userId', ParseIntPipe) userId: number,
-  ) {}
+  ) {
+    if (client.chat.id) this.leaveChat(client);
+    if (!client.game.id) this.quickGame(client);
+    this.server.to(`room:user:${userId}`).emit('single:game:inviteUser', {
+      gameId: client.game.id,
+      sourceId: client.user.id,
+      sourceUsername: this.userService.getUsernameForSocket(client.user.id),
+    });
+  }
 
   /* =============================== */
   /*             Private             */
@@ -669,8 +675,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
         position: gameSession.private.ball.position,
       });
       // todo: 나중에 다시 조져봐야 함
-    }, 1000 / 10);
-    // }, 1000 / gameSession.private.ball.speed);
+    }, 1000 / gameSession.private.ball.speed);
   }
 
   endRound(gameSession: GameSessionDto) {
