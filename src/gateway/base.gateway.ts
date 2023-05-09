@@ -587,7 +587,7 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       ) {
         console.log('endGame');
         clearInterval(gameSession.private.gameInterval);
-        const gameReult = this.gameService.endGame(gameSession.private);
+        const gameReult = await this.gameService.endGame(gameSession.private);
         this.server.to(client.game.room).emit('group:game:endGame', {
           winner: gameReult.winner,
           loser: gameReult.loser,

@@ -9,6 +9,7 @@ import GameSessionDto, {
 import ExceptionMessage from '@dto/socket/exception.message';
 import ClientSocket from '@dto/socket/client.socket';
 import ClientException from '@exception/client.exception';
+import GameLogRepository from '@repository/game_log.repository';
 
 @Injectable()
 class GameService {
@@ -18,7 +19,10 @@ class GameService {
   private readonly downKey = 40;
   private readonly paddle = [0, 1, 2];
 
-  constructor(private readonly gameSession: GameSession) {}
+  constructor(
+    private readonly gameSession: GameSession,
+    private readonly gameLogRepository: GameLogRepository,
+  ) {}
 
   /* ============================ */
   /*        Public Method         */
@@ -279,12 +283,17 @@ class GameService {
     gamePrivate.onRound = false;
   }
 
-  endGame(gamePrivate: GamePrivateDto) {
+  async endGame(gamePrivate: GamePrivateDto) {
     const sortedPlayer = gamePrivate.players.sort((a, b) => b.score - a.score);
+
+    if (sortedPlayer[0].score === 11)
+      await this.gameLogRepository.createGameLogs(sortedPlayer);
     gamePrivate.onGame = false;
+
     return {
       winner: sortedPlayer[0],
       loser: sortedPlayer[1],
+      abnormal: sortedPlayer[0].score === 11,
     };
   }
 
