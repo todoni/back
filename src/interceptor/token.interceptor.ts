@@ -10,7 +10,7 @@ import { Response } from 'express';
 
 import { AuthService } from '@service/auth.service';
 import { UserService } from '@service/user.service';
-import { AuthResponseDto } from '@dto/auth.dto';
+import { AuthResponseDto } from '@dto/auth/auth.dto';
 import { User } from '@entity/user.entity';
 
 @Injectable()
@@ -30,12 +30,14 @@ export class TokenInterceptor implements NestInterceptor {
         const res: Response = context.switchToHttp().getResponse();
         const user: User = context.switchToHttp().getRequest().user;
 
-        if (!result.twoFactor) {
+        if (result.type) {
           const tokenResult = await this.authService.getJwtToken(
-            user.name,
             user.id,
+            user.name,
+            result.type,
+            '5m',
           );
-          res.cookie('token', tokenResult.access_token, {
+          res.cookie('token', tokenResult, {
             httpOnly: true,
             maxAge: 432000000000,
             sameSite: 'none', // todo: 배포 시 strict로 변경

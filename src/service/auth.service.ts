@@ -6,6 +6,7 @@ import { UserService } from '@service/user.service';
 import ExceptionMessage from '@dto/socket/exception.message';
 import ClientException from '@exception/client.exception';
 import { User } from '@entity/user.entity';
+import { TokenPayloadDto, TokenType } from '@dto/auth/token.dto';
 
 @Injectable()
 export class AuthService {
@@ -43,9 +44,14 @@ export class AuthService {
     return this.decodeToken(token);
   }
 
-  async getJwtToken(name: string, id: number) {
-    const payload = { name: name, id: id };
-    return { access_token: this.jwtService.sign(payload) };
+  async getJwtToken(
+    id: number,
+    name: string,
+    type: TokenType,
+    expiresIn?: string,
+  ) {
+    const payload: TokenPayloadDto = { id: id, name: name, type: type };
+    return this.jwtService.sign(payload, { expiresIn: expiresIn });
   }
 
   async access(user: User) {

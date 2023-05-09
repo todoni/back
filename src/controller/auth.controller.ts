@@ -16,10 +16,11 @@ import { JwtAuthGuard } from '@guard/jwt.guard';
 import { FtAuthGuard } from '@guard/ft.guard';
 import { AuthService } from '@service/auth.service';
 import { UserService } from '@service/user.service';
-import { AuthResponseDto } from '@dto/auth.dto';
+import { AuthResponseDto } from '@dto/auth/auth.dto';
 import { TokenInterceptor } from '@interceptor/token.interceptor';
 import { User } from '@entity/user.entity';
 import { ConfigService } from '@nestjs/config';
+import { TokenType } from '@dto/auth/token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -40,18 +41,34 @@ export class AuthController {
   @UseInterceptors(TokenInterceptor)
   async callback(@Req() req): Promise<AuthResponseDto> {
     const user: User = req.user;
-    if (!user.twoFactor)
-      return { status: 302, message: 'OK', redirectPath: 'lobby' };
-    // todo: two-factor 페이지 구현되면, redirectPath 설정
-    else return { status: 200, message: '2단계 인증 필요', twoFactor: true };
+    if (user.firstAccess)
+      return {
+        status: 302,
+        message: 'OK',
+        redirectPath: 'signup',
+        type: TokenType.FIRST_ACCESS,
+      };
+    else if (!user.twoFactor)
+      return {
+        status: 302,
+        message: 'OK',
+        redirectPath: 'lobby',
+        type: TokenType.ACCESS_KEY,
+      };
+    else
+      return {
+        status: 302,
+        message: '2단계 인증 필요',
+        redirectPath: 'two-factor',
+        type: TokenType.TWO_FACTOR,
+        expiresIn: '5m', // todo: 수정 필요
+      };
   }
 
   @Get('logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@Req() req, @Res() res: Response): Promise<any> {
-    const user = req.user;
-    const tokenResult = await this.authService.getJwtToken(user.name, user.id);
-    res.cookie('token', tokenResult.access_token, {
+  async logout(@Res() res: Response): Promise<any> {
+    res.cookie('token', '', {
       httpOnly: true,
       maxAge: 0,
       domain: this.configService.get('serverConfig.url'),

@@ -1,7 +1,10 @@
+import { TokenType } from '@dto/auth/token.dto';
+
 export interface AuthResponseDto {
   status: number;
   message: string;
-  twoFactor?: boolean;
+  type?: TokenType;
+  expiresIn?: string;
   redirectPath?: string;
 }
 
