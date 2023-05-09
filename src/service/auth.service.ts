@@ -41,7 +41,15 @@ export class AuthService {
         );
       });
 
-    return this.decodeToken(token);
+    const payload = this.decodeToken(token) as TokenPayloadDto;
+
+    if (payload.type !== TokenType.ACCESS_KEY)
+      throw new ClientException(
+        ExceptionMessage.ADDITIONAL_PROCESS,
+        HttpStatus.FOUND,
+      );
+
+    return payload;
   }
 
   async getJwtToken(
@@ -51,11 +59,7 @@ export class AuthService {
     expiresIn?: string,
   ) {
     const payload: TokenPayloadDto = { id: id, name: name, type: type };
-    return this.jwtService.sign(payload, { expiresIn: expiresIn });
-  }
-
-  async access(user: User) {
-    await this.userService.firstAccess(user);
+    return this.jwtService.sign(payload, { expiresIn: expiresIn || '1d' });
   }
 
   decodeToken(token: string) {

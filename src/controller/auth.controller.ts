@@ -21,6 +21,7 @@ import { TokenInterceptor } from '@interceptor/token.interceptor';
 import { User } from '@entity/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { TokenType } from '@dto/auth/token.dto';
+import UserSignupDto from '@dto/user/user.signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -78,8 +79,10 @@ export class AuthController {
 
   @Post('two-factor')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(TokenInterceptor)
   async checkTwoFactor(@Req() req, @Body() body) {
     await this.userService.checkTwoFactor(req.user, body.code);
+    return { status: 200, message: 'OK', type: TokenType.ACCESS_KEY };
   }
 
   @Patch('two-factor')
@@ -88,16 +91,11 @@ export class AuthController {
     await this.userService.updateTwoFactor(req.user, body.code);
   }
 
-  @Get('first-access')
+  @Post('signup')
   @UseGuards(JwtAuthGuard)
-  async access(@Req() req) {
-    await this.authService.access(req.user);
-  }
-
-  @Get('test/{userId}')
   @UseInterceptors(TokenInterceptor)
-  async test(@Req() req, @Param() param) {
-    const userId = parseInt(param, 10);
-    req.user = await this.userService.findByUserId(userId);
+  async signup(@Req() req, @Body() body: UserSignupDto) {
+    await this.userService.signup(req.user, body);
+    return { status: 200, message: 'OK', type: TokenType.ACCESS_KEY };
   }
 }

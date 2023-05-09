@@ -3,6 +3,7 @@ import { DataSource, Repository } from 'typeorm';
 
 import { User } from '@entity/user.entity';
 import { UserAccessDto } from '@dto/user/user.dto';
+import UserSignupDto from '@dto/user/user.signup.dto';
 
 @Injectable()
 export default class UserRepository extends Repository<User> {
@@ -67,6 +68,17 @@ export default class UserRepository extends Repository<User> {
       .update()
       .set({ twoFactor: twoFactor })
       .where('users.id = :userId', { userId: userId })
+      .execute();
+  }
+
+  async signup(userId: number, profile: string, nickname: string) {
+    await this.createQueryBuilder('users')
+      .update()
+      .set({
+        profile,
+        nickname,
+      })
+      .where('user.id = :userId', { userId })
       .execute();
   }
 }

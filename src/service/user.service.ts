@@ -12,6 +12,8 @@ import UserSocketState from '@dto/user/user.socket.state';
 import EncryptionService from '@service/encryption.service';
 import ExceptionMessage from '@dto/socket/exception.message';
 import ClientException from '@exception/client.exception';
+import UserSignupDto from '@dto/user/user.signup.dto';
+import ImageService from './image.service';
 
 @Injectable()
 export class UserService {
@@ -23,6 +25,7 @@ export class UserService {
     private readonly gameLogRepository: GameLogRepository,
     private readonly userAchievementRepository: UserAchievementRepository,
     private readonly encryptionService: EncryptionService,
+    private readonly imageService: ImageService,
   ) {}
 
   getUsernameForSocket(userId: number) {
@@ -133,7 +136,6 @@ export class UserService {
       friendList,
       blockList,
       gameLogList,
-      userAchievementList,
     );
 
     if (user == null) {
@@ -151,8 +153,6 @@ export class UserService {
     const friendList = await this.friendRepository.findFriends(userId);
     const blockList = await this.blockRepository.findBlocks(userId);
     const gameLogList = await this.gameLogRepository.findGameLogs(userId);
-    const userAchievementList =
-      await this.userAchievementRepository.findUserAchievement(userId);
 
     const user = userList.find((e) => e.id === +userId);
     const result: UserDetailDto = UserDetailDto.fromData(
@@ -161,7 +161,6 @@ export class UserService {
       friendList,
       blockList,
       gameLogList,
-      userAchievementList,
     );
 
     if (user == null) {
@@ -174,15 +173,13 @@ export class UserService {
     return result;
   }
 
-  async firstAccess(user: User) {
-    if (!user.firstAccess)
-      throw new ClientException(
-        ExceptionMessage.FORBIDDEN,
-        HttpStatus.FORBIDDEN,
-      );
-
-    user.firstAccess = false;
-    await this.userRepository.updateFirstAccess(user);
+  async signup(user: User, userSignupDto: UserSignupDto) {
+    const filename = `${user.id}-${this.getProfileSequence(user.id)}`;
+    const imageUrl = userSignupDto.image
+      ? await this.imageService.uploadImage(filename, userSignupDto.image)
+      : user.profile;
+    const nickname = userSignupDto.nickname || user.nickname;
+    await this.userRepository.signup(user.id, imageUrl, nickname);
   }
 
   async deleteUserByEntity(user: User) {

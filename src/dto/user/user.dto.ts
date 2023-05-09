@@ -2,7 +2,6 @@ import { Block } from '@entity/block.entity';
 import { Friend } from '@entity/friend.entity';
 import { GameLog } from '@entity/game_log.entity';
 import { User } from '@entity/user.entity';
-import { UserAchievement } from '@entity/user_achievement';
 
 export class UserDto {
   id: number;
@@ -34,7 +33,6 @@ export class UserDetailDto {
     friendList: Friend[],
     blockList: Block[],
     gameLogList: GameLog[],
-    userAchievementList: UserAchievement[],
   ): UserDetailDto {
     const temp = new UserDetailDto();
     temp.id = user.id;

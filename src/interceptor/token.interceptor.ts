@@ -35,7 +35,7 @@ export class TokenInterceptor implements NestInterceptor {
             user.id,
             user.name,
             result.type,
-            '5m',
+            result.expiresIn,
           );
           res.cookie('token', tokenResult, {
             httpOnly: true,
