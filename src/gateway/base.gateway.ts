@@ -42,7 +42,12 @@ import { GameAuthInterceptor } from '@interceptor/game.interceptor';
 import CreateGameDto from '@dto/game/create.game.dto';
 import ClientException from '@exception/client.exception';
 
-@WebSocketGateway(4000)
+@WebSocketGateway(4000, {
+  cors: {
+    origin: 'http://localhost:3001',
+    credentials: true,
+  },
+})
 @UseFilters(SocketGlobalFilter)
 @UsePipes(new ValidationPipe())
 class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
