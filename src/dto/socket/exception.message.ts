@@ -10,6 +10,7 @@ enum ExceptionMessage {
   GAME_START_ERROR = '게임 시작 중 문제가 발생하였습니다.',
   GAME_STARTED = '게임중인 방에 참여할 수 없습니다.',
   ADDITIONAL_PROCESS = '로그인에 추가 단계가 필요합니다. (2단계 인증, 회원가입 등)',
+  IN_GAME = '이미 게임방에 참여한 사용자입니다.',
 }
 
 export default ExceptionMessage;

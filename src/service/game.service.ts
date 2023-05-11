@@ -82,16 +82,17 @@ class GameService {
     return gameSession;
   }
 
-  quickGame(userId: number, username: string) {
+  quickGame(userId: number, username: string, isCreate?: boolean) {
     const allGame = this.gameSession.getAllGame();
     const randIdx = Math.floor(Math.random() * allGame.length);
 
     // todo: speed 변경해야 함
     return {
-      isCreated: allGame.length === 0,
-      gameSession: !allGame.length
-        ? this.createGame(userId, 100, { username: username })
-        : this.joinGame(allGame[randIdx].gameId, userId),
+      isCreated: isCreate || allGame.length === 0,
+      gameSession:
+        isCreate || !allGame.length
+          ? this.createGame(userId, 100, { username: username })
+          : this.joinGame(allGame[randIdx].gameId, userId),
     };
   }
 
@@ -284,16 +285,18 @@ class GameService {
   }
 
   async endGame(gamePrivate: GamePrivateDto) {
-    const sortedPlayer = gamePrivate.players.sort((a, b) => b.score - a.score);
+    const sortedPlayer = [...gamePrivate.players].sort(
+      (a, b) => b.score - a.score,
+    );
 
-    if (sortedPlayer[0].score === 11)
+    if (sortedPlayer[0].score === gamePrivate.totalScore)
       await this.gameLogRepository.createGameLogs(sortedPlayer);
     gamePrivate.onGame = false;
 
     return {
       winner: sortedPlayer[0],
       loser: sortedPlayer[1],
-      abnormal: sortedPlayer[0].score === 11,
+      abnormal: sortedPlayer[0].score === gamePrivate.totalScore,
     };
   }
 

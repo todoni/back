@@ -499,7 +499,10 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @UseInterceptors(new GameAuthInterceptor({ hasGame: false }))
   @SubscribeMessage('quickGame')
-  quickGame(@ConnectedSocket() client: ClientSocket) {
+  quickGame(
+    @ConnectedSocket() client: ClientSocket,
+    @MessageBody('isCreate') isCreate?: boolean,
+  ) {
     const gameState = this.gameService.quickGame(
       client.user.id,
       this.userService.getUsernameForSocket(client.user.id),
@@ -631,15 +634,22 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @UseInterceptors(
     new SocketValidationInterceptor('userId'),
-    new GameAuthInterceptor(),
+    new ChatAuthInterceptor(),
+    new GameAuthInterceptor({ hasGame: false }),
   )
   @SubscribeMessage('inviteGame')
   inviteGame(
     @ConnectedSocket() client: ClientSocket,
     @MessageBody('userId', ParseIntPipe) userId: number,
   ) {
+    const targetUser = this.socketSession.get(userId);
+    if (targetUser.game.id)
+      throw new ClientException(
+        ExceptionMessage.IN_GAME,
+        HttpStatus.BAD_REQUEST,
+      );
     if (client.chat.id) this.leaveChat(client);
-    if (!client.game.id) this.quickGame(client);
+    if (!client.game.id) this.quickGame(client, true);
     this.server.to(`room:user:${userId}`).emit('single:game:inviteUser', {
       gameId: client.game.id,
       sourceId: client.user.id,

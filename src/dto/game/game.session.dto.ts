@@ -24,7 +24,7 @@ export class GamePrivateDto {
   playerTempList: GamePlayerDto[] = [];
   watcher: number[] = [];
   ball: GameBallDto = new GameBallDto();
-  totalScore: number = 11;
+  totalScore: number = 5;
   round: number = 0;
   pause: boolean = false;
   onGame: boolean = false;
