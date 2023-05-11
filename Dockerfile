@@ -11,4 +11,4 @@ RUN yarn
 
 COPY . .
 
-CMD ["yarn deploy:prod"]
+CMD ["yarn", "deploy:prod"]
