@@ -144,7 +144,6 @@ export class UserService {
         HttpStatus.NOT_FOUND,
       );
     }
-
     return result;
   }
 
@@ -173,12 +172,12 @@ export class UserService {
     return result;
   }
 
-  async signup(user: User, userSignupDto: UserSignupDto) {
+  async signup(user: User, name: string, image: string) {
     const filename = `${user.id}-${this.getProfileSequence(user.id)}`;
-    const imageUrl = userSignupDto.image
-      ? await this.imageService.uploadImage(filename, userSignupDto.image)
+    const imageUrl = image
+      ? await this.imageService.uploadImage(filename, image)
       : user.profile;
-    const nickname = userSignupDto.nickname || user.nickname;
+    const nickname = name || user.nickname;
     await this.userRepository.signup(user.id, imageUrl, nickname);
   }
 

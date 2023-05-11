@@ -59,7 +59,14 @@ export class UserDetailDto {
       (gameLogList.filter((ele) => ele.winnerId === user.id).length /
         gameLogList.length) *
       100;
-    temp.userLogs = gameLogList;
+    temp.userLogs = gameLogList.map((e): UserLog => {
+      return {
+        id: e.id,
+        winner: userList.find((ele) => ele.id === e.winnerId).nickname || '',
+        looser: userList.find((ele) => ele.id === e.looserId).nickname || '',
+        score: e.score,
+      };
+    });
     temp.achivements = [];
 
     return temp;
@@ -68,8 +75,8 @@ export class UserDetailDto {
 
 export class UserLog {
   id: number;
-  winnerId: number;
-  looserId: number;
+  winner: string;
+  looser: string;
   score: number;
 }
 

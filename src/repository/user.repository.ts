@@ -75,10 +75,11 @@ export default class UserRepository extends Repository<User> {
     await this.createQueryBuilder('users')
       .update()
       .set({
-        profile,
-        nickname,
+        profile: profile,
+        nickname: nickname,
+        firstAccess: false,
       })
-      .where('user.id = :userId', { userId })
+      .where('users.id = :userId', { userId })
       .execute();
   }
 }

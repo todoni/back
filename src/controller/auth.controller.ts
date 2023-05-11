@@ -94,8 +94,9 @@ export class AuthController {
   @Post('signup')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(TokenInterceptor)
-  async signup(@Req() req, @Body() body: UserSignupDto) {
-    await this.userService.signup(req.user, body);
+  async signup(@Req() req, @Body() body) {
+    console.log(body);
+    await this.userService.signup(req.user, body.nickname, body.image);
     return { status: 200, message: 'OK', type: TokenType.ACCESS_KEY };
   }
 }
