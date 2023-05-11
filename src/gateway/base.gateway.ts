@@ -77,6 +77,8 @@ class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
         gameList: this.gameService.getAllGame(),
       });
     } catch (err) {
+      // todo: delete
+      console.log('== Socket =================');
       console.log(err);
       const exception = SocketException.fromOptions({
         status: err instanceof HttpException ? err.getStatus() : 500,

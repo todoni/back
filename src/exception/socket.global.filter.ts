@@ -19,6 +19,7 @@ export class SocketGlobalFilter extends BaseWsExceptionFilter {
     let navigate: string = undefined;
 
     // todo: delete
+    console.log('== Socket =================');
     console.log(exception);
 
     if (exception instanceof HttpException) {
