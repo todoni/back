@@ -12,3 +12,14 @@ export class FtAuthGuard extends AuthGuard('ft') {
     return super.canActivate(context);
   }
 }
+
+@Injectable()
+export class GoogleAuthGuard extends AuthGuard('google') {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest();
+    super.logIn(request).catch(() => true);
+    return super.canActivate(context);
+  }
+}
