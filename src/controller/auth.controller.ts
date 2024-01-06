@@ -1,27 +1,25 @@
 import {
+  Body,
   Controller,
   Get,
-  UseGuards,
+  Patch,
+  Post,
   Req,
   Res,
+  UseGuards,
   UseInterceptors,
-  Post,
-  Patch,
-  Body,
-  Param,
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { AuthResponseDto } from '@dto/auth/auth.dto';
+import { TokenType } from '@dto/auth/token.dto';
+import { User } from '@entity/user.entity';
+import { FtAuthGuard, GoogleAuthGuard } from '@guard/ft.guard';
 import { JwtAuthGuard } from '@guard/jwt.guard';
-import { FtAuthGuard } from '@guard/ft.guard';
+import { TokenInterceptor } from '@interceptor/token.interceptor';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from '@service/auth.service';
 import { UserService } from '@service/user.service';
-import { AuthResponseDto } from '@dto/auth/auth.dto';
-import { TokenInterceptor } from '@interceptor/token.interceptor';
-import { User } from '@entity/user.entity';
-import { ConfigService } from '@nestjs/config';
-import { TokenType } from '@dto/auth/token.dto';
-import UserSignupDto from '@dto/user/user.signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +28,20 @@ export class AuthController {
     private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async toGoogleAuth(@Req() req) {}
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleCallback(@Req() req, @Res() res): Promise<AuthResponseDto> {
+    //const user: User = req.user;
+    const { user } = req;
+    console.log('*******************************');
+    return res.send(user);
+  }
 
   @Get('login')
   @UseGuards(FtAuthGuard)

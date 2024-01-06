@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-42';
+import { Profile, Strategy } from 'passport-google-oauth20';
 
 import { UserService } from '@service/user.service';
 
@@ -36,5 +36,49 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
       });
     }
     return user;
+  }
+}
+
+@Injectable()
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+  ) {
+    super({
+      clientID: configService.get('GOOGLE_CLIENT_ID'),
+      clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
+      callbackURL: configService.get('GOOGLE_OAUTH_CALLBACK_URL'),
+      scope: ['email', 'profile'],
+    });
+    console.log('google client id', configService.get('GOOGLE_CLIENT_ID'));
+  }
+
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: Profile,
+    done: any,
+  ): Promise<any> {
+    /*const user = await this.userService.findUserByUsername(profile['username']);
+
+    if (!user) {
+      const new_user = profile;
+      return {
+        provider: 'google',
+        providerId: new_user.id,
+        name: new_user.name.givenName,
+        email: new_user.emails[0].value,
+      };*/
+    const { id, name, emails, photos } = profile;
+    const user = {
+      provider: 'google',
+      providerId: id,
+      name: name,
+      email: emails[0].value,
+      accessToken,
+      refreshToken,
+    };
+    done(null, user);
   }
 }

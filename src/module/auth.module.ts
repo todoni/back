@@ -1,19 +1,18 @@
 import { Module } from '@nestjs/common';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
-import { UserModule } from '@module/user.module';
 import { AuthController } from '@controller/auth.controller';
-import { FtStrategy } from '@strategy/ft.strategy';
-import { JwtStrategy } from '@strategy/jwt.strategy';
+import { TokenInterceptor } from '@interceptor/token.interceptor';
+import ServiceModule from '@module/service.module';
+import { UserModule } from '@module/user.module';
 import { AuthService } from '@service/auth.service';
 import { UserService } from '@service/user.service';
-import { TokenInterceptor } from '@interceptor/token.interceptor';
+import UserSession from '@session/user.session';
+import { GoogleStrategy } from '@strategy/ft.strategy';
 import repositories from '@util/repository';
 import SessionModule from './session.module';
-import UserSession from '@session/user.session';
-import ServiceModule from '@module/service.module';
 
 @Module({
   imports: [
@@ -39,9 +38,8 @@ import ServiceModule from '@module/service.module';
     AuthService,
     UserService,
     UserSession,
-    JwtStrategy,
     ConfigService,
-    FtStrategy,
+    GoogleStrategy,
     ...repositories,
   ],
   exports: [AuthService, TokenInterceptor],
