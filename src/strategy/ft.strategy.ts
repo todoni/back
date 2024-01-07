@@ -62,14 +62,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const user = await this.userService.findUserByUsername(
       profile._json['given_name'],
     );
-
     if (!user) {
       return await this.userService.createUser({
-        id: profile['id'],
+        id: Math.floor(Number(profile['id']) / 1000000000000),
         name: profile._json['given_name'],
         nickname: profile['displayName'],
-        twoFactor: null,
-        profile: profile['profileUrl'],
+        twoFactor: '0000',
+        profile: 'asdf',
         firstAccess: true,
       });
     }

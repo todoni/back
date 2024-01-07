@@ -1,18 +1,17 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 
+import ExceptionMessage from '@dto/socket/exception.message';
 import { UserDetailDto, UserDto } from '@dto/user/user.dto';
+import UserSocketState from '@dto/user/user.socket.state';
 import { User } from '@entity/user.entity';
+import ClientException from '@exception/client.exception';
 import BlockRepository from '@repository/block.repository';
 import FriendRepository from '@repository/friend.repository';
 import GameLogRepository from '@repository/game_log.repository';
 import UserRepository from '@repository/user.repository';
 import UserAchievementRepository from '@repository/user_achievement.repository';
-import UserSession from '@session/user.session';
-import UserSocketState from '@dto/user/user.socket.state';
 import EncryptionService from '@service/encryption.service';
-import ExceptionMessage from '@dto/socket/exception.message';
-import ClientException from '@exception/client.exception';
-import UserSignupDto from '@dto/user/user.signup.dto';
+import UserSession from '@session/user.session';
 import ImageService from './image.service';
 
 @Injectable()
@@ -99,10 +98,10 @@ export class UserService {
 
   async findUserByUsername(
     username: string,
-    isTest: boolean = true,
+    isTest = true,
   ): Promise<User | null> {
     const result = await this.userRepository.findUserByName(username);
-    if (isTest == false && result == null) {
+    if (isTest === false && result === null) {
       throw new ClientException(
         ExceptionMessage.NOT_FOUND,
         HttpStatus.NOT_FOUND,
@@ -209,7 +208,7 @@ export class UserService {
     const user = await this.userRepository.findUser(userId);
     if (user.profile.indexOf('cdn.intra.42.fr') !== -1) return 1;
 
-    const sequence = parseInt(user.profile.split('com/')[1].split('-')[1], 10);
+    const sequence = parseInt(user.profile.split('com/')[1]?.split('-')[1], 10);
 
     if (!sequence || isNaN(sequence)) return 1;
     return sequence + 1;

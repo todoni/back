@@ -11,6 +11,7 @@ import { AuthService } from '@service/auth.service';
 import { UserService } from '@service/user.service';
 import UserSession from '@session/user.session';
 import { GoogleStrategy } from '@strategy/ft.strategy';
+import { JwtStrategy } from '@strategy/jwt.strategy';
 import repositories from '@util/repository';
 import SessionModule from './session.module';
 
@@ -40,6 +41,7 @@ import SessionModule from './session.module';
     UserSession,
     ConfigService,
     GoogleStrategy,
+    JwtStrategy,
     ...repositories,
   ],
   exports: [AuthService, TokenInterceptor],
