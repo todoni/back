@@ -38,9 +38,21 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req, @Res() res): Promise<AuthResponseDto> {
     //const user: User = req.user;
-    const { user } = req;
-    console.log('*******************************');
-    return res.send(user);
+    const user: User = req.user;
+    if (user.firstAccess)
+      return {
+        status: 302,
+        message: 'OK',
+        redirectPath: 'signup',
+        type: TokenType.FIRST_ACCESS,
+      };
+    else
+      return {
+        status: 302,
+        message: 'OK',
+        redirectPath: 'lobby',
+        type: TokenType.ACCESS_KEY,
+      };
   }
 
   @Get('login')

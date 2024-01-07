@@ -58,27 +58,21 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: any,
   ): Promise<any> {
-    /*const user = await this.userService.findUserByUsername(profile['username']);
+    const user = await this.userService.findUserByUsername(
+      profile._json['given_name'],
+    );
 
     if (!user) {
-      const new_user = profile;
-      return {
-        provider: 'google',
-        providerId: new_user.id,
-        name: new_user.name.givenName,
-        email: new_user.emails[0].value,
-      };*/
-    const { id, name, emails, photos } = profile;
-    const user = {
-      provider: 'google',
-      providerId: id,
-      name: name,
-      email: emails[0].value,
-      accessToken,
-      refreshToken,
-    };
-    done(null, user);
+      return await this.userService.createUser({
+        id: profile['id'],
+        name: profile._json['given_name'],
+        nickname: profile['displayName'],
+        twoFactor: null,
+        profile: profile['profileUrl'],
+        firstAccess: true,
+      });
+    }
+    return user;
   }
 }
